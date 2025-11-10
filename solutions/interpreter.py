@@ -178,7 +178,11 @@ def step(state: State) -> State | str:
             
         case jvm.Get(static=val):
             if frame.locals and (0 in frame.locals or 1 in frame.locals):
-                if frame.locals[0] == Value.int(0) or frame.locals[0] == Value.int(1):
+                if frame.locals[0] == Value.int(0):
+                    frame.stack.push(Value.int(0))
+                    frame.pc += 1
+                if frame.locals[0] == Value.int(1):
+                    frame.stack.push(Value.int(1))
                     frame.pc += 1
                     return state
                 else:
@@ -199,22 +203,31 @@ def step(state: State) -> State | str:
             
         case jvm.Ifz(condition=cond, target=val):
             
-            v = frame.locals[0]
-            if cond == 'eq': 
+            v = frame.stack.pop()
+            #v = frame.locals[0]
+            if cond == 'eq': # equal to zero
                 if v == Value.int(0):
                     #logger.debug(f"Jumping to {val}")
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     #logger.debug(f"Not jumping")
                     frame.pc += 1
-            if cond == 'ne':
+            if cond == 'ne': # not equal to zero
                 # logger.debug(f"Stack items: , {frame.stack.items}")
                 # logger.debug(f"comparing v: {v} to 0")
                 if v != Value.int(0):
-                    #logger.debug(f"Jumping to {val}")
                     frame.pc = PC(frame.pc.method, val)
                 else:
-                    #logger.debug(f"Not jumping")
+                    frame.pc += 1
+            if cond == 'gt': # greater than zero
+                if v.value > 0:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            if cond == 'ge': # greater than or equal to zero
+                if v.value >= 0:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
                     frame.pc += 1
             return state         
         
@@ -227,7 +240,7 @@ def step(state: State) -> State | str:
         
         case jvm.Dup():
             v = frame.stack.peek()
-            frame.stack.push(Value.int(v))
+            frame.stack.push(v)
             frame.pc += 1
             return state
         
@@ -268,7 +281,7 @@ def step(state: State) -> State | str:
             # return state
             
         case jvm.If(condition=cond, target=val):
-            if cond == 'gt':
+            if cond == 'gt': # greater than
                 v2, v1 = frame.stack.pop(), frame.stack.pop()
                 if v1.value > v2.value:
                     # logger.debug(f"Jumping to {val}")
@@ -276,6 +289,25 @@ def step(state: State) -> State | str:
                 else:
                     # logger.debug(f"Not jumping")
                     frame.pc += 1
+            if cond == 'ge': # greater than or equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value >= v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            if cond == 'ne': # not equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value != v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            # if cond == 'eq': # equal
+            #     v2, v1 = frame.stack.pop(), frame.stack.pop()
+            #     if v1.value == v2.value:
+            #         frame.pc = PC(frame.pc.method, val)
+            #     else:
+            #         frame.pc += 1
+                
             return state
         
         case jvm.Store(type=jvm.Int(), index=i):
@@ -289,24 +321,70 @@ def step(state: State) -> State | str:
             return state
         
         case jvm.NewArray(type=jvm.Int(), dim=dim):
+            size = frame.stack.pop()
             array_ref = len(state.heap)
-            state.heap[array_ref] = [0] * dim
-            frame.stack.push(array_ref)
+            state.heap[array_ref] = [0] * size.value
+            frame.stack.push(Value.int(array_ref))
             frame.pc += 1
             return state
         
         case jvm.ArrayStore(type=jvm.Int()):
             value, index, array_ref = frame.stack.pop(), frame.stack.pop(), frame.stack.pop()
+            logger.debug(f"Storing value {value} at index {index} of array {array_ref}")
+
+
+            # check for null
+            if getattr(array_ref, "value", array_ref) is None:
+                return "null pointer"
+            if not hasattr(array_ref, "value"):
+                array_ref = Value.int(array_ref)
+
             
-            state.heap[array_ref.value][index.value] = value.value
+            try:
+                state.heap[array_ref.value][index.value] = value.value
+            except Exception as e:
+                return "assertion error"
             frame.pc += 1
             return state
         
-        case jvm.Cast(from_=jvm.Int(), to_=jvm.Short()): # TODO: This case is not complete but for now it works... :/
+        case jvm.Cast(from_=jvm.Int(), to_=jvm.Short()): # This case is not complete but for now it works... :/
             v = frame.stack.pop()
             assert v.type is jvm.Int(), f"expected int, but got {v}"
+            # TODO: Handle casting
             frame.pc += 1
             return state
+        
+        case jvm.Store(type=jvm.Reference(), index=i): # Handle reference store
+            v = frame.stack.pop()
+            frame.locals.update({i: v})
+            frame.pc += 1
+            return state
+        
+        case jvm.Load(type=jvm.Reference(), index=i): # Handle reference load
+            v = frame.locals[i]
+            frame.stack.push(v)
+            frame.pc += 1
+            return state
+        
+        case jvm.ArrayLength():
+            array_ref = frame.stack.pop()
+            length = len(state.heap[array_ref.value])
+            logger.debug(f"Array length of array {array_ref.value} is {length}")
+            frame.stack.push(jvm.Value.int(length))
+            frame.pc += 1
+            return state
+        
+        case jvm.ArrayLoad(type=jvm.Int()):
+            index, array_ref = frame.stack.pop(), frame.stack.pop()
+            logger.debug(f"Loading value at index {index} from array {array_ref}")
+            try:
+                value = state.heap[array_ref.value][index.value]
+            except Exception as e:
+                return "assertion error"
+            frame.stack.push(jvm.Value.int(value))
+            frame.pc += 1
+            return state
+        
 
         case a:
             # a.help()
