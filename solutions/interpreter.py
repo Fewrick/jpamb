@@ -12,6 +12,7 @@ logger.add(sys.stderr, format="[{level}] {message}")
 
 methodid, input = jpamb.getcase()
 
+# ┌ Case jpamb.cases.Simple.checkBeforeDivideByN2:(0) -> ok ------------------- This one is nor working anymore
 
 @dataclass
 class PC:
