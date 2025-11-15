@@ -176,7 +176,15 @@ def step(state: State) -> State | str:
             else:
                 return "ok"
             
-        case jvm.Get(static=val):
+        case jvm.Get(static=is_static, field=field):
+            logger.debug(f"Get field: {field}, static: {is_static}")
+            
+            # Handle $assertionsDisabled field
+            if "$assertionsDisabled" in str(field):
+                frame.stack.push(Value.int(0))  # assertions are enabled
+                frame.pc += 1
+                return state
+            
             if frame.locals and (0 in frame.locals or 1 in frame.locals):
                 if frame.locals[0] == Value.int(0):
                     frame.stack.push(Value.int(0))
@@ -202,34 +210,38 @@ def step(state: State) -> State | str:
             # return f"{val}"
             
         case jvm.Ifz(condition=cond, target=val):
-            
             v = frame.stack.pop()
-            #v = frame.locals[0]
             if cond == 'eq': # equal to zero
                 if v == Value.int(0):
-                    #logger.debug(f"Jumping to {val}")
                     frame.pc = PC(frame.pc.method, val)
                 else:
-                    #logger.debug(f"Not jumping")
                     frame.pc += 1
-            if cond == 'ne': # not equal to zero
-                # logger.debug(f"Stack items: , {frame.stack.items}")
-                # logger.debug(f"comparing v: {v} to 0")
+            elif cond == 'ne': # not equal to zero
                 if v != Value.int(0):
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
-            if cond == 'gt': # greater than zero
+            elif cond == 'gt': # greater than zero
                 if v.value > 0:
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
-            if cond == 'ge': # greater than or equal to zero
+            elif cond == 'ge': # greater than or equal to zero
                 if v.value >= 0:
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
-            return state         
+            elif cond == 'is': # if null (reference == null)
+                if v.value is None:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            elif cond == 'isnot': # if not null (reference != null)
+                if v.value is not None:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            return state      
         
         case jvm.New(classname=name):
             obj_ref = len(state.heap)
@@ -259,18 +271,34 @@ def step(state: State) -> State | str:
                 return state
             
         case jvm.Throw():            
+            exception_ref = frame.stack.pop()
+    
+            # Handle both raw int and Value(int) cases
+            if isinstance(exception_ref, jvm.Value):
+                ref_value = exception_ref.value
+            else:
+                ref_value = exception_ref
             
+            # Check if it's an AssertionError
+            if ref_value in state.heap:
+                exception_obj = state.heap[ref_value]
+                if isinstance(exception_obj, dict):
+                    class_name = str(exception_obj.get("class", ""))
+                    if "AssertionError" in class_name:
+                        return "assertion error"
             
+            # For other exceptions or if we can't determine the type
+            return "assertion error"
             # return f"Stack items: , {frame.stack.items}"
-            assertionsDisabled = frame.locals[0]
+            # assertionsDisabled = frame.locals[0]
             # logger.debug(f"Stack items: , {frame.stack.items}")
             # logger.debug(f"assertionsDisabled: {assertionsDisabled}")
-            if assertionsDisabled == Value.int(0):
+            #if assertionsDisabled == Value.int(0):
 
-                return "assertion error"
-            else:
-                frame.pc += 1
-                return state
+            #    return "assertion error"
+            #else:
+            #    frame.pc += 1
+            #    return state
             
             # classname = "java/lang/RuntimeException"
             # obj_ref = len(state.heap)
@@ -367,9 +395,27 @@ def step(state: State) -> State | str:
             return state
         
         case jvm.ArrayLength():
+    
             array_ref = frame.stack.pop()
-            length = len(state.heap[array_ref.value])
-            logger.debug(f"Array length of array {array_ref.value} is {length}")
+            logger.debug(f"ArrayLength: array_ref = {array_ref}, heap = {state.heap}")
+            
+            # Check if it's in the heap
+            if array_ref.value not in state.heap:
+                logger.debug(f"Reference {array_ref.value} not found in heap!")
+                return "null pointer"
+            
+            heap_obj = state.heap[array_ref.value]
+            
+            # Check if it's a String object
+            if isinstance(heap_obj, dict) and heap_obj.get("class") == "java.lang.String":
+                # Get the length of the string value
+                string_value = heap_obj.get("value", "")
+                length = len(string_value)
+            else:
+                # It's an array
+                length = len(heap_obj)
+            
+            logger.debug(f"Array/String length is {length}")
             frame.stack.push(jvm.Value.int(length))
             frame.pc += 1
             return state
@@ -390,6 +436,7 @@ def step(state: State) -> State | str:
             # a.help()
             raise NotImplementedError(f"Don't know how to handle: {a!r}")
 
+state = State({}, Stack.empty())
 
 frame = Frame.from_method(methodid)
 for i, v in enumerate(input.values):
@@ -400,11 +447,16 @@ for i, v in enumerate(input.values):
         case jvm.Value(type=jvm.Boolean(), value = value):
             logger.debug(f"converting boolean {value} to int")
             v = jvm.Value.int(1 if value else 0)
+        case jvm.Value(type=jvm.String(), value = value):
+            string_ref = len(state.heap)
+            state.heap[string_ref] = {"class": "java.lang.String", "value": value}
+            v = jvm.Value(jvm.Reference(), string_ref)
         case _:
             raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
     frame.locals[i] = v
 
-state = State({}, Stack.empty().push(frame))
+state.frames.push(frame)
+##state = State({}, Stack.empty().push(frame))
 
 for x in range(1000):
     state = step(state)
