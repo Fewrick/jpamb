@@ -60,3 +60,10 @@ jpamb.cases.Tricky.collatz:(I)V                              (0) -> assertion er
 jpamb.cases.Tricky.collatz:(I)V                              (24) -> ok
 jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     ("") -> assertion error
 jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     ("PA") -> ok
+jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/String;)V  ("HELLO") -> ok
+jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/String;)V  ("hello") -> assertion error
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("ab") -> assertion error
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abc") -> ok
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abcd") -> ok
+jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("hello") -> ok
+jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("world") -> assertion error

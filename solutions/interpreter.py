@@ -200,12 +200,12 @@ def step(state: State) -> State | str:
             # assert val is True, f"expected boolean, but got {val}"
             # assert val >= 0
             # logger.debug(f"Get static field value: {val}")
-            if val is True:
-                frame.stack.push(1)
-            else: 
-                frame.stack.push(0)
-            frame.pc += 1
-            return state
+            #if val is True:
+            #    frame.stack.push(1)
+            #else: 
+            #    frame.stack.push(0)
+            #frame.pc += 1
+            #return state
             
             # return f"{val}"
             
@@ -269,6 +269,60 @@ def step(state: State) -> State | str:
                 # Handle other special methods
                 frame.pc += 1
                 return state
+        case jvm.InvokeVirtual(method=mid):
+            logger.debug(f"InvokeVirtual: classname={mid.classname.dotted()}, method={mid.extension.name}")
+            # Handle String methods
+            if str(mid.classname) == "java/lang/String" or str(mid.classname) == "java.lang.String":
+                obj_ref = frame.stack.pop()  
+                
+                if obj_ref.value is None:
+                    return "null pointer"
+                
+                string_obj = state.heap[obj_ref.value]
+                string_value = string_obj.get("value", "")
+                
+                if mid.extension.name == "length":
+                    #returns int
+                    length = len(string_value)
+                    frame.stack.push(jvm.Value.int(length))
+                    frame.pc += 1
+                    return state
+                    
+                elif mid.extension.name == "toUpperCase":
+                    #returns String
+                    upper = string_value.upper()
+                    new_string_ref = len(state.heap)
+                    state.heap[new_string_ref] = {"class": "java.lang.String", "value": upper}
+                    frame.stack.push(jvm.Value(jvm.Reference(), new_string_ref))
+                    frame.pc += 1
+                    return state
+                
+                elif mid.extension.name == "charAt":
+                    index = frame.stack.pop()
+                    if 0 <= index.value < len(string_value):
+                        char = string_value[index.value]
+                        frame.stack.push(jvm.Value.int(ord(char)))
+                    else:
+                        return "out of bounds"
+                    frame.pc += 1
+                    return state
+                    
+                elif mid.extension.name == "equals":
+                    #returns boolean
+                    other_ref = frame.stack.pop()
+                    if other_ref.value in state.heap:
+                        other_obj = state.heap[other_ref.value]
+                        other_value = other_obj.get("value", "")
+                        result = 1 if string_value == other_value else 0
+                    else:
+                        result = 0
+                    frame.stack.push(jvm.Value.int(result))
+                    frame.pc += 1
+                    return state
+                raise NotImplementedError(f"String method {mid.extension.name} not implemented")
+        
+            raise NotImplementedError(f"InvokeVirtual not implemented for {mid}")
+
             
         case jvm.Throw():            
             exception_ref = frame.stack.pop()
@@ -329,12 +383,12 @@ def step(state: State) -> State | str:
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
-            # if cond == 'eq': # equal
-            #     v2, v1 = frame.stack.pop(), frame.stack.pop()
-            #     if v1.value == v2.value:
-            #         frame.pc = PC(frame.pc.method, val)
-            #     else:
-            #         frame.pc += 1
+            if cond == 'eq': # equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value == v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
                 
             return state
         

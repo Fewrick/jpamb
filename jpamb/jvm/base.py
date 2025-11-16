@@ -168,9 +168,12 @@ class Type(ABC):
                     return Array(inner_type)
                 case "class":
                     class_name = json["name"]
-                    if class_name == "java.lang.String":
+                    normalized_name = class_name.replace("/", ".")
+                    
+                    if normalized_name == "java.lang.String" or class_name == "java/lang/String":
                         return String()
-                    return Object(ClassName(class_name.replace("/", ".")))
+                    
+                    return Object(ClassName(normalized_name))
                 case kind:
                     raise NotImplementedError(
                         f"Unknown kind {kind}, in Type.from_json: {json!r}"
