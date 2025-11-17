@@ -361,6 +361,13 @@ def step(state : AState) -> Iterable[AState | str]:
                 else:
                     frame.pc += 1
                     return state
+            if cond == 'le':
+                if "0" in v or "-" in v:
+                    frame.pc = PC(frame.pc.method, val)
+                    return state
+                else:
+                    frame.pc += 1
+                    return state
                 
 
         case jvm.If(condition=cond, target=val):
@@ -389,6 +396,14 @@ def step(state : AState) -> Iterable[AState | str]:
                 if False in result:
                     frame.pc += 1
                     return state
+            if cond == 'eq': # not equal
+                result = Arithmetic.equal(v1, v2)
+                if True in result:
+                    frame.pc = PC(frame.pc.method, val)
+                    return state
+                if False in result:
+                    frame.pc += 1
+                    return state
 
         case jvm.Get(static=is_static, field=field):
             if "$assertionsDisabled" in str(field):
@@ -406,6 +421,20 @@ def step(state : AState) -> Iterable[AState | str]:
         case jvm.Dup():
             v = frame.stack.peek()
             frame.stack.push(v)
+            frame.pc += 1
+            return state
+        
+        case jvm.Store(type=jvm.Int(), index=i):
+            v = frame.stack.pop()
+            frame.locals[i] = v
+            frame.pc += 1
+            return state
+        
+        case jvm.Goto(target=val):
+            frame.pc = PC(frame.pc.method, val)
+            return state
+
+        case jvm.Cast(from_=jvm.Int(), to_=jvm.Short()):
             frame.pc += 1
             return state
         
