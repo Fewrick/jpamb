@@ -546,13 +546,15 @@ def build(suite, compile, decompile, document, test, docker):
         f"{suite.workfolder}:/workspace",
         docker,
     ]
+    def _rel(path: Path) -> str:
+        return path.relative_to(suite.workfolder).as_posix()
 
     if compile:
         log.info("Compiling")
         run(
             cmd
             + ["javac", "-d", "target/classes"]
-            + list(a.relative_to(suite.workfolder) for a in suite.sourcefiles()),
+            + list(_rel(a) for a in suite.sourcefiles()),
             logerr=log.warning,
             logout=log.info,
             timeout=600,
@@ -580,7 +582,7 @@ def build(suite, compile, decompile, document, test, docker):
                 + [
                     "jvm2json",
                     "-s",
-                    suite.classfile(cl).relative_to(suite.workfolder),
+                    _rel(suite.classfile(cl)),
                 ],
                 logerr=log.warning,
             )
@@ -663,7 +665,7 @@ def build(suite, compile, decompile, document, test, docker):
                     + [
                         "java",
                         "-cp",
-                        folder.relative_to(suite.workfolder),
+                        _rel(folder),
                         "-ea",
                         "jpamb.Runtime",
                         case.methodid.encode(),

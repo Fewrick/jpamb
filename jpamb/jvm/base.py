@@ -104,6 +104,18 @@ class Type(ABC):
                     r = Float()
                 case "D":
                     r = Double()
+                case "L":
+                    end = input.find(";", i)
+                    if end == -1:
+                        raise ValueError(f"Could not decode {input}")
+                    class_path = input[i + 1:end]
+                    if class_path == "java/lang/String":
+                        r = String()
+                    else:
+                        r = Object(ClassName(class_path.replace("/", ".")))
+                    i = end+1
+                    break 
+
                 case "[":  # ]
                     stack.append(Array)
                     i += 1
@@ -143,12 +155,25 @@ class Type(ABC):
                     return Reference()
                 case "boolean":
                     return Boolean()
+                case "string":
+                    return String()
         if "base" in json:
             return Type.from_json(json["base"])
         if "kind" in json:
             match json["kind"]:
                 case "array":
-                    return Array(Type.from_json(json["type"]))
+                    inner_type = Type.from_json(json["type"])
+                    if isinstance(inner_type, Char):
+                        return String()
+                    return Array(inner_type)
+                case "class":
+                    class_name = json["name"]
+                    normalized_name = class_name.replace("/", ".")
+                    
+                    if normalized_name == "java.lang.String" or class_name == "java/lang/String":
+                        return String()
+                    
+                    return Object(ClassName(normalized_name))
                 case kind:
                     raise NotImplementedError(
                         f"Unknown kind {kind}, in Type.from_json: {json!r}"
@@ -309,6 +334,19 @@ class Object(Type):
     def math(self):
         return f"object {self.name}"
 
+@dataclass(frozen=True, order=True)
+class String(Type):
+    _instance = None
+    def __new__(cls) -> "String":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def encode(self):
+        return "Ljava/lang/String;"
+    
+    def math(self):
+        return "string"
 
 @dataclass(frozen=True, order=True)
 class Array(Type):
@@ -593,6 +631,9 @@ class Value:
                 return str(self.value)
             case Char():
                 return f"'{self.value}'"
+            case String():
+                escaped = str(self.value).replace('\\', '\\\\').replace('"', '\\"')
+                return f'"{escaped}"'
             case Array(content):
                 assert isinstance(self.value, Iterable)
                 match content:
@@ -619,6 +660,10 @@ class Value:
     def char(cls, char: str) -> Self:
         assert len(char) == 1, f"string should be exactly one char, was {char!r}"
         return cls(Char(), char)
+    
+    @classmethod
+    def string(cls, s: str) -> Self:
+        return cls(String(), s)
 
     @classmethod
     def array(cls, type: Type, content: Iterable) -> Self:
@@ -660,6 +705,7 @@ class ValueParser:
         token_specification = [
             ("OPEN_ARRAY", r"\[[IC]:"),
             ("CLOSE_ARRAY", r"\]"),
+            ("STRING", r'"(?:[^"\\]|\\.)*"'),
             ("INT", r"-?\d+"),
             ("BOOL", r"true|false"),
             ("CHAR", r"'[^']'"),
@@ -710,6 +756,8 @@ class ValueParser:
                 return Value.char(self.parse_char())
             case "BOOL":
                 return Value.boolean(self.parse_bool())
+            case "STRING":
+                return Value.string(self.parse_string())
             case "OPEN_ARRAY":
                 return self.parse_array()
         self.expected("char")
@@ -725,6 +773,12 @@ class ValueParser:
     def parse_char(self):
         tok = self.expect("CHAR")
         return tok.value[1]
+    
+    def parse_string(self):
+        tok = self.expect("STRING")
+        s = tok.value[1:-1]
+        s = s.replace('\\"', '"').replace('\\\\', '\\')
+        return s
 
     def parse_array(self):
         key = self.expect("OPEN_ARRAY")
