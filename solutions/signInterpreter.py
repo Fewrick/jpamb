@@ -29,6 +29,9 @@ class SignSet:
         if (member  in self.signs):
             return True
         return False
+    
+    def add(self, member : str) -> None:
+        self.signs.add(member)
 
 
     @classmethod
@@ -88,7 +91,7 @@ class Arithmetic:
     def divide(s1 : SignSet, s2 : SignSet) -> SignSet | str:
         result = set()
         if "0" in s2.signs:
-            return "divide by zero"
+            result.add("divide by zero")
         if "0" in s1.signs:
             result.add("0")
         if ("+" in s1.signs and "+" in s2.signs) or ("-" in s1.signs and "-" in s2.signs):
@@ -245,14 +248,21 @@ class Frame:
     def from_method(method: jvm.AbsMethodID) -> "Frame":
         return Frame({}, Stack.empty(), PC(method, 0))
 
+import copy
 
 @dataclass
 class AState:
     heap: dict[int, jvm.Value]
     frames: Stack[Frame]
 
+    def copy(self):
+        return AState(copy.deepcopy(self.heap), copy.deepcopy(self.frames))
+
     def __str__(self):
         return f"{self.heap} {self.frames}"
+    
+
+
 
 
 def step(state : AState) -> Iterable[AState | str]:
@@ -264,43 +274,45 @@ def step(state : AState) -> Iterable[AState | str]:
         case jvm.Push(value=v):
             frame.stack.push(SignSet.abstract([v.value]))
             frame.pc += 1
-            return state
+            yield state
 
         case jvm.Load(type=jvm.Int(), index=i):
             frame.stack.push(frame.locals[i])
             frame.pc += 1
-            return state
+            yield state
         
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Div): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             result = Arithmetic.divide(v1, v2)
-            if isinstance(result, str):
+            if "divide by zero" in result:
+                yield "divide by zero"
+                result.signs.remove("divide by zero")
+            print(result)
+            if result.signs.__len__() > 0:
+                frame.stack.push(result)
                 frame.pc += 1
-                return result
-            frame.stack.push(result)
-            frame.pc += 1
-            return state
+                yield state
         
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Add): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             result = Arithmetic.add(v1, v2)
             frame.stack.push(result)
             frame.pc += 1
-            return state
+            yield state
         
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Sub): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             result = Arithmetic.subtract(v1, v2)
             frame.stack.push(result)
             frame.pc += 1
-            return state
+            yield state
 
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Mul): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             result = Arithmetic.multiply(v1, v2)
             frame.stack.push(result)
             frame.pc += 1
-            return state
+            yield state
         
         case jvm.Return(type=jvm.Int()):
             v1 = frame.stack.pop()
@@ -309,134 +321,135 @@ def step(state : AState) -> Iterable[AState | str]:
                 frame = state.frames.peek()
                 frame.stack.push(v1)
                 frame.pc += 1
-                return state
+                yield state
             else:
-                return "ok"
+                yield "ok"
             
-
         case jvm.Return(type=None):
             state.frames.pop()
             if state.frames:
                 frame = state.frames.peek()
                 frame.pc += 1
-                return state
+                yield state
             else:
-                return "ok"
+                yield "ok"
 
         case jvm.Ifz(condition=cond, target=val, offset = offset):
+            currentPC = frame.pc
             v = frame.stack.pop()
-            print(v)
+
             if "true" in v:
                 frame.pc = PC(frame.pc.method, val)
-                return state
+                yield state.copy()
             if "false" in v:
-                frame.pc += 1
-                return state
+                frame.pc = currentPC + 1
+                yield state.copy()
       
             if cond == 'eq': 
                 if "0" in v:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
+                    yield state.copy()
                 if "+" in v or "-" in v:
-                    frame.pc += 1
-                    return state
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'ne':
                 if "+" in v or "-" in v:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
-                elif "0" in v:
-                    frame.pc += 1
-                    return state
+                    yield state.copy()
+                if "0" in v:
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'gt': # greater than zero
                 if "+" in v:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
-                else:
-                    frame.pc += 1
-                    return state
+                    yield state.copy()
+                if "0" in v or "-" in v:
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'ge':
                 if "0" in v or "+" in v:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
-                else:
-                    frame.pc += 1
-                    return state
+                    yield state.copy()
+                if "-" in v:
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'le':
                 if "0" in v or "-" in v:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
-                else:
-                    frame.pc += 1
-                    return state
+                    yield state.copy()
+                if "+" in v:
+                    frame.pc = currentPC + 1
+                    yield state
                 
 
         case jvm.If(condition=cond, target=val):
+            currentPC = frame.pc
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             if cond == 'gt': # greater than
                 result = Arithmetic.greaterThan(v1, v2)
                 if True in result:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
+                    yield state.copy()
                 if False in result:
-                    frame.pc += 1
-                    return state
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'ge': # greater than or equal
                 result = Arithmetic.greaterEqual(v1, v2)
                 if True in result:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
+                    yield state.copy()
                 if False in result:
-                    frame.pc += 1
-                    return state
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'ne': # not equal
                 result = Arithmetic.notEqual(v1, v2)
                 if True in result:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
+                    yield state.copy()
                 if False in result:
-                    frame.pc += 1
-                    return state
+                    frame.pc = currentPC + 1
+                    yield state
             if cond == 'eq': # not equal
                 result = Arithmetic.equal(v1, v2)
                 if True in result:
                     frame.pc = PC(frame.pc.method, val)
-                    return state
+                    yield state.copy()
                 if False in result:
-                    frame.pc += 1
-                    return state
+                    frame.pc = currentPC + 1
+                    yield state
 
         case jvm.Get(static=is_static, field=field):
             if "$assertionsDisabled" in str(field):
                 frame.stack.push("0")  # assertions are enabled
                 frame.pc += 1
-                return state
+                yield state
         
         case jvm.New(classname=name):
             obj_ref = len(state.heap)
             state.heap[obj_ref] = {"class": name}
             frame.stack.push(obj_ref)
             frame.pc += 1
-            return state
+            yield state
 
         case jvm.Dup():
             v = frame.stack.peek()
             frame.stack.push(v)
             frame.pc += 1
-            return state
+            yield state
         
         case jvm.Store(type=jvm.Int(), index=i):
             v = frame.stack.pop()
             frame.locals[i] = v
             frame.pc += 1
-            return state
+            yield state
         
         case jvm.Goto(target=val):
             frame.pc = PC(frame.pc.method, val)
-            return state
+            yield state
 
         case jvm.Cast(from_=jvm.Int(), to_=jvm.Short()):
             frame.pc += 1
-            return state
+            yield state
         
         case jvm.InvokeSpecial(method=mid):
             method_name = mid.extension.name
@@ -446,25 +459,45 @@ def step(state : AState) -> Iterable[AState | str]:
                 state.heap[obj_ref] = {"class": mid.classname._as_string}
                 frame.stack.push(obj_ref)
                 frame.pc += 1
-                return state
+                yield state
             else:
                 # Handle other special methods
                 frame.pc += 1
-                return state
+                yield state
             
         case jvm.Throw():
-            return "assertion error"
+            yield "assertion error"
         
         case a:
             raise NotImplementedError(f"Don't know how to handle: {a!r}")
 
 
-# def many_step(state : dict[PC, AState | str]) -> dict[PC, AState | str]:
-#   new_state = dict(state)
-#   for k, v in state.items():
-#       for s in step(v):
-#         new_state[s.pc] |= s
-#   return new_state
+from collections import deque
+from typing import Iterable, Union
+
+def run_all(initial: AState, max_steps: int = 10000) -> set[Union[AState, str]]:
+    """Runs symbolic execution until all branches terminate or max_steps reached."""
+    results = set()
+    worklist = deque([initial])
+    steps = 0
+
+    while worklist and steps < max_steps:
+        state = worklist.popleft()
+        steps += 1
+
+        out = step(state)
+
+        for nxt in out:
+            if isinstance(nxt, str):  # Terminated with result
+                results.add(nxt)
+            else:
+                worklist.append(nxt)
+
+    if steps >= max_steps:
+        results.add("*")
+
+    return results
+
 
 
 
@@ -475,27 +508,43 @@ methodid, input = jpamb.getcase()
 
 
 frame = Frame.from_method(methodid)
+
 for i, v in enumerate(input.values):
-    
     match v: 
         case jvm.Value(type=jvm.Int(), value = value):
             v = SignSet.abstract({value})
         case jvm.Value(type=jvm.Boolean(), value = value):
             v = SignSet("true" if value else "false")
+        case jvm.Value(type=jvm.String(), value = value):
+            v = SignSet(set())
+            if "-" in value:
+                v.signs.add("-")
+            if "+" in value:
+                v.signs.add("+")
+            if "0" in value:
+                v.signs.add("0")
+            print(v)
+
         case _:
             raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
     print(f"Local {i} = {v}")
     frame.locals[i] = v
 
-state = AState({}, Stack.empty().push(frame))
 
-for x in range(1000):
-    state = step(state)
-    if isinstance(state, str):
-        print(state)
-        break
-else:
-    print("*")
+initial_state = AState({}, Stack.empty().push(frame))
+results = run_all(initial_state)
+
+
+for r in results:
+    print(r)
 
 
 
+
+
+# def many_step(state : dict[PC, AState | str]) -> dict[PC, AState | str]:
+#   new_state = dict(state)
+#   for k, v in state.items():
+#       for s in step(v):
+#         new_state[s.pc] |= s
+#   return new_state
