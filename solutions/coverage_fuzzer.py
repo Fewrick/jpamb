@@ -1,40 +1,45 @@
-import os
-import sys
-import subprocess
 import argparse
+import subprocess
+import sys
+from pathlib import Path
 
-#!/usr/bin/env python3
-# run_coverage_fuzzer.py
-# Small runner to execute the coverage_fuzzer.py script and stream its output.
 
+def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
+    """Run `solutions/interpreter.py` with the given method id and input string.
 
-DEFAULT_PATH = r"C:\Users\kaspe\Programming\GitHub\Mining_jpamb\solutions\coverage_fuzzer.py"
+    Returns a tuple of (returncode, stdout, stderr).
+    """
+    interp_path = Path(__file__).resolve().parent / "interpreter.py"
+    if not interp_path.exists():
+        raise FileNotFoundError(f"interpreter.py not found at {interp_path}")
+
+    cmd = [sys.executable, str(interp_path), methodid, input_str]
+
+    if capture_output:
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        return proc.returncode, proc.stdout, proc.stderr
+    else:
+        proc = subprocess.run(cmd)
+        return proc.returncode, "", ""
+
 
 def main():
-    parser = argparse.ArgumentParser(description="Run coverage_fuzzer.py and stream output.")
-    parser.add_argument("path", nargs="?", default=DEFAULT_PATH, help="Path to coverage_fuzzer.py")
+    parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input.")
+    parser.add_argument("methodid", help="method id to pass to interpreter (e.g. 'jpamb.cases.Simple.assertInteger:(I)V')")
+    parser.add_argument("input", help="input string to pass to interpreter (e.g. '(1)')")
+    parser.add_argument("--no-capture", dest="capture", action="store_false", help="don't capture interpreter output; stream to console")
     args = parser.parse_args()
 
-    path = os.path.abspath(args.path)
-    if not os.path.isfile(path):
-        print(f"File not found: {path}", file=sys.stderr)
-        sys.exit(2)
+    rc, out, err = run_interpreter(args.methodid, args.input, capture_output=args.capture)
 
-    cmd = [sys.executable, path]
-    print("Running:", " ".join(cmd), file=sys.stderr)
+    if args.capture:
+        if out:
+            print(out, end="")
+        if err:
+            print(err, file=sys.stderr, end="")
 
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-    try:
-        for line in proc.stdout:
-            print(line, end="")
-    except KeyboardInterrupt:
-        proc.kill()
-        proc.wait()
-        print("\nExecution interrupted by user.", file=sys.stderr)
-        sys.exit(130)
+    sys.exit(rc)
 
-    proc.wait()
-    sys.exit(proc.returncode)
 
 if __name__ == "__main__":
     main()
