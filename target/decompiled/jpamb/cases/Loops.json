@@ -781,6 +781,820 @@
         "type": null
       },
       "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5) -> small"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(10) -> medium"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(20) -> large"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 1,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "ge",
+            "offset": 3,
+            "opr": "if",
+            "target": 5
+          },
+          {
+            "offset": 6,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "small"
+            }
+          },
+          {
+            "offset": 8,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "index": 0,
+            "offset": 9,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 10,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 20
+            }
+          },
+          {
+            "condition": "ge",
+            "offset": 12,
+            "opr": "if",
+            "target": 10
+          },
+          {
+            "offset": 15,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "medium"
+            }
+          },
+          {
+            "offset": 17,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 18,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "large"
+            }
+          },
+          {
+            "offset": 20,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 46,
+            "offset": 0
+          },
+          {
+            "line": 47,
+            "offset": 3
+          },
+          {
+            "line": 49,
+            "offset": 5
+          },
+          {
+            "line": 50,
+            "offset": 8
+          },
+          {
+            "line": 52,
+            "offset": 10
+          }
+        ],
+        "max_locals": 1,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          },
+          {
+            "index": 10,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "testMultipleBranches",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5) -> less"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(10) -> equal"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(15) -> greater"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 1,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 3,
+            "opr": "if",
+            "target": 5
+          },
+          {
+            "offset": 6,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "equal"
+            }
+          },
+          {
+            "offset": 8,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "index": 0,
+            "offset": 9,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 10,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "ge",
+            "offset": 12,
+            "opr": "if",
+            "target": 10
+          },
+          {
+            "offset": 15,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "less"
+            }
+          },
+          {
+            "offset": 17,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 18,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "greater"
+            }
+          },
+          {
+            "offset": 20,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 59,
+            "offset": 0
+          },
+          {
+            "line": 60,
+            "offset": 3
+          },
+          {
+            "line": 62,
+            "offset": 5
+          },
+          {
+            "line": 63,
+            "offset": 8
+          },
+          {
+            "line": 65,
+            "offset": 10
+          }
+        ],
+        "max_locals": 1,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          },
+          {
+            "index": 10,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "testEqual",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5) -> not equal"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(10) -> is ten"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 1,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "eq",
+            "offset": 3,
+            "opr": "if",
+            "target": 5
+          },
+          {
+            "offset": 6,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "not equal"
+            }
+          },
+          {
+            "offset": 8,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 9,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "is ten"
+            }
+          },
+          {
+            "offset": 11,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 71,
+            "offset": 0
+          },
+          {
+            "line": 72,
+            "offset": 3
+          },
+          {
+            "line": 74,
+            "offset": 5
+          }
+        ],
+        "max_locals": 1,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "testNotEqual",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(15) -> ok"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5) -> too small"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 1,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "lt",
+            "offset": 3,
+            "opr": "if",
+            "target": 5
+          },
+          {
+            "offset": 6,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "ok"
+            }
+          },
+          {
+            "offset": 8,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 9,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "too small"
+            }
+          },
+          {
+            "offset": 11,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 80,
+            "offset": 0
+          },
+          {
+            "line": 81,
+            "offset": 3
+          },
+          {
+            "line": 83,
+            "offset": 5
+          }
+        ],
+        "max_locals": 1,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "testGreaterOrEqual",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5) -> ok"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(15) -> too big"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 1,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "gt",
+            "offset": 3,
+            "opr": "if",
+            "target": 5
+          },
+          {
+            "offset": 6,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "ok"
+            }
+          },
+          {
+            "offset": 8,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 9,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "too big"
+            }
+          },
+          {
+            "offset": 11,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 89,
+            "offset": 0
+          },
+          {
+            "line": 90,
+            "offset": 3
+          },
+          {
+            "line": 92,
+            "offset": 5
+          }
+        ],
+        "max_locals": 1,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "testLessOrEqual",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
     }
   ],
   "name": "jpamb/cases/Loops",
