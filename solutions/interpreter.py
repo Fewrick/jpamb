@@ -406,7 +406,7 @@ def step(state: State) -> State | str:
             return state
         
         case jvm.Store(type=jvm.Int(), index=i):
-            v = frame.stack.pop()
+            v = frame.stack.peek()
             frame.locals[i] = v
             frame.pc += 1
             return state
@@ -498,7 +498,31 @@ def step(state: State) -> State | str:
             frame.pc += 1
             return state
         
+        # case jvm.Value(type=jvm.Array(contains=jvm.Int()), value=vals):
+        #     # vals may be a tuple of ints or jvm.Value(int, ...)
+        #     array_ref = len(state.heap)
+        #     elements = []
+        #     for item in vals:
+        #         if isinstance(item, jvm.Value):
+        #             if item.type is jvm.Int():
+        #                 elements.append(item.value)
+        #             else:
+        #                 raise NotImplementedError(f"array contains unsupported value: {item}")
+        #         else:
+        #             # assume a plain python int
+        #             elements.append(item)
+        #     state.heap[array_ref] = elements
+        #     frame.stack.push(jvm.Value(jvm.Reference(), array_ref))
+        #     frame.pc += 1
+        #     return state
 
+        # case jvm.Incr(index=i, constant=c):
+        #     v = frame.locals[i]
+        #     assert v.type is jvm.Int(), f"expected int, but got {v}"
+        #     frame.locals[i] = jvm.Value.int(v.value + c)
+        #     frame.pc += 1
+        #     return state
+        
         case a:
             # a.help()
             raise NotImplementedError(f"Don't know how to handle: {a!r}")
