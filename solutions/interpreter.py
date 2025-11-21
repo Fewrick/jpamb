@@ -302,12 +302,24 @@ def step(state: State) -> State | str:
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
-            # if cond == 'eq': # equal
-            #     v2, v1 = frame.stack.pop(), frame.stack.pop()
-            #     if v1.value == v2.value:
-            #         frame.pc = PC(frame.pc.method, val)
-            #     else:
-            #         frame.pc += 1
+            if cond == 'eq': # equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value == v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            if cond == 'lt': # Less than
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value < v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            if cond == 'le': # Less than or equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value <= v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
                 
             return state
         
@@ -344,7 +356,7 @@ def step(state: State) -> State | str:
             try:
                 state.heap[array_ref.value][index.value] = value.value
             except Exception as e:
-                return "assertion error"
+                return "out of bounds"
             frame.pc += 1
             return state
         
