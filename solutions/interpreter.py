@@ -156,6 +156,16 @@ def step(state: State) -> State | str:
             frame.stack.push(jvm.Value.int(v1.value * v2.value))
             frame.pc += 1
             return state
+        
+        case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Rem): # Binary remainder
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            assert v1.type is jvm.Int(), f"expected int, but got {v1}"
+            assert v2.type is jvm.Int(), f"expected int, but got {v2}"
+            if v2.value == 0:
+                return "divide by zero"
+            frame.stack.push(jvm.Value.int(v1.value % v2.value))
+            frame.pc += 1
+            return state
 
         case jvm.Return(type=jvm.Int()):
             v1 = frame.stack.pop()
@@ -255,6 +265,22 @@ def step(state: State) -> State | str:
             v = frame.stack.peek()
             frame.stack.push(v)
             frame.pc += 1
+            return state
+        
+        case jvm.InvokeStatic(method=mid):
+            logger.debug(f"InvokeStatic: classname={mid.classname.dotted()}, method={mid.extension.name}")
+
+            params = getattr(mid.extension, "params", None)
+            param_elems = getattr(params, "_elements", ()) if params is not None else ()
+            param_count = len(param_elems)
+
+            args = [frame.stack.pop() for _ in range(param_count)][::-1]
+
+            callee = Frame.from_method(mid)
+            for i, a in enumerate(args):
+                callee.locals[i] = a
+
+            state.frames.push(callee)
             return state
         
         case jvm.InvokeSpecial(method=mid):
@@ -516,12 +542,12 @@ def step(state: State) -> State | str:
         #     frame.pc += 1
         #     return state
 
-        # case jvm.Incr(index=i, constant=c):
-        #     v = frame.locals[i]
-        #     assert v.type is jvm.Int(), f"expected int, but got {v}"
-        #     frame.locals[i] = jvm.Value.int(v.value + c)
-        #     frame.pc += 1
-        #     return state
+        case jvm.Incr(index=i, amount=c):
+            v = frame.locals[i]
+            assert v.type is jvm.Int(), f"expected int, but got {v}"
+            frame.locals[i] = jvm.Value.int(v.value + c)
+            frame.pc += 1
+            return state
         
         case a:
             # a.help()
