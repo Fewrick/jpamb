@@ -67,3 +67,13 @@ jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abc") -> ok
 jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abcd") -> ok
 jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("hello") -> ok
 jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("world") -> assertion error
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;           (5, true) -> pass
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;           (5, false) -> fail
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;           (15, false) -> pass
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;           (15, true) -> excellent
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;        (100, 50) -> first wins
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;        (50, 100) -> second wins
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;        (75, 75) -> tie
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;     (5, 10, 3) -> medium
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;     (15, 8, 12) -> high
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;     (2, 1, 1) -> low

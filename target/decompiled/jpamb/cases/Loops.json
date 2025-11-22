@@ -1595,6 +1595,726 @@
         }
       },
       "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5, true) -> pass"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5, false) -> fail"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(15, false) -> pass"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(15, true) -> excellent"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 1,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "condition": "eq",
+            "offset": 1,
+            "opr": "ifz",
+            "target": 3
+          },
+          {
+            "amount": 10,
+            "index": 0,
+            "offset": 4,
+            "opr": "incr"
+          },
+          {
+            "index": 0,
+            "offset": 7,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 8,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 20
+            }
+          },
+          {
+            "condition": "lt",
+            "offset": 10,
+            "opr": "if",
+            "target": 8
+          },
+          {
+            "offset": 13,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "excellent"
+            }
+          },
+          {
+            "offset": 15,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "index": 0,
+            "offset": 16,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 17,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "lt",
+            "offset": 19,
+            "opr": "if",
+            "target": 13
+          },
+          {
+            "offset": 22,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "pass"
+            }
+          },
+          {
+            "offset": 24,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 25,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "fail"
+            }
+          },
+          {
+            "offset": 27,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 99,
+            "offset": 0
+          },
+          {
+            "line": 100,
+            "offset": 2
+          },
+          {
+            "line": 102,
+            "offset": 3
+          },
+          {
+            "line": 103,
+            "offset": 6
+          },
+          {
+            "line": 105,
+            "offset": 8
+          },
+          {
+            "line": 106,
+            "offset": 11
+          },
+          {
+            "line": 108,
+            "offset": 13
+          }
+        ],
+        "max_locals": 2,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 3,
+            "type": "same"
+          },
+          {
+            "index": 8,
+            "type": "same"
+          },
+          {
+            "index": 13,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "examResult",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        },
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "boolean"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(100, 50) -> first wins"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(50, 100) -> second wins"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(75, 75) -> tie"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 1,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "condition": "le",
+            "offset": 2,
+            "opr": "if",
+            "target": 5
+          },
+          {
+            "offset": 5,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "first wins"
+            }
+          },
+          {
+            "offset": 7,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "index": 1,
+            "offset": 8,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 0,
+            "offset": 9,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "condition": "le",
+            "offset": 10,
+            "opr": "if",
+            "target": 10
+          },
+          {
+            "offset": 13,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "second wins"
+            }
+          },
+          {
+            "offset": 15,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 16,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "tie"
+            }
+          },
+          {
+            "offset": 18,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 115,
+            "offset": 0
+          },
+          {
+            "line": 116,
+            "offset": 3
+          },
+          {
+            "line": 118,
+            "offset": 5
+          },
+          {
+            "line": 119,
+            "offset": 8
+          },
+          {
+            "line": 121,
+            "offset": 10
+          }
+        ],
+        "max_locals": 2,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          },
+          {
+            "index": 10,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "compareScores",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        },
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5, 10, 3) -> medium"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(15, 8, 12) -> high"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(2, 1, 1) -> low"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 1,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 2,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "index": 2,
+            "offset": 3,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 4,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "offset": 5,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 3
+            }
+          },
+          {
+            "offset": 6,
+            "operant": "div",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "index": 3,
+            "offset": 7,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "index": 3,
+            "offset": 8,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 9,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 5
+            }
+          },
+          {
+            "condition": "ge",
+            "offset": 10,
+            "opr": "if",
+            "target": 13
+          },
+          {
+            "offset": 13,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "low"
+            }
+          },
+          {
+            "offset": 15,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "index": 3,
+            "offset": 16,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 17,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 10
+            }
+          },
+          {
+            "condition": "ge",
+            "offset": 19,
+            "opr": "if",
+            "target": 18
+          },
+          {
+            "offset": 22,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "medium"
+            }
+          },
+          {
+            "offset": 24,
+            "opr": "return",
+            "type": "ref"
+          },
+          {
+            "offset": 25,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "high"
+            }
+          },
+          {
+            "offset": 27,
+            "opr": "return",
+            "type": "ref"
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 128,
+            "offset": 0
+          },
+          {
+            "line": 129,
+            "offset": 8
+          },
+          {
+            "line": 130,
+            "offset": 11
+          },
+          {
+            "line": 132,
+            "offset": 13
+          },
+          {
+            "line": 133,
+            "offset": 16
+          },
+          {
+            "line": 135,
+            "offset": 18
+          }
+        ],
+        "max_locals": 4,
+        "max_stack": 2,
+        "stack_map": [
+          {
+            "index": 13,
+            "info": [
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "append_frame"
+          },
+          {
+            "index": 18,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "averageCategory",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        },
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        },
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "base": "int"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": {
+          "args": [],
+          "inner": null,
+          "kind": "class",
+          "name": "java/lang/String"
+        }
+      },
+      "typeparams": []
     }
   ],
   "name": "jpamb/cases/Loops",
