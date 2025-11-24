@@ -7,6 +7,7 @@ from pathlib import Path
 
 import jpamb
 from jpamb import jvm
+import re
 
 
 def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
@@ -22,10 +23,29 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
 
     if capture_output:
         proc = subprocess.run(cmd, capture_output=True, text=True)
+
+        lines = proc.stdout.strip().splitlines()
+        msg = lines[0] if len(lines) > 0 else ""
+        arr_literal = lines[1] if len(lines) > 1 else "[]"
+
+        # parse arr_literal like "[1, 2, 3]" or "1,2,3" or "1 2 3" into a list of ints
+        s = arr_literal.strip()
+        if s.startswith("[") and s.endswith("]"):
+            s = s[1:-1]
+        parts = [p for p in re.split(r"[,\s]+", s) if p]
+        arr = []
+        for p in parts:
+            try:
+                arr.append(int(p))
+            except ValueError:
+                # ignore non-integer tokens
+                pass
+
         return proc.returncode, proc.stdout, proc.stderr
     else:
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
+
 
 
 def _encode_values(values: list[jvm.Value]) -> str:

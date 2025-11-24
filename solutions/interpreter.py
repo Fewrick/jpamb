@@ -1,6 +1,7 @@
 import jpamb
 from jpamb import jvm
 from dataclasses import dataclass, field
+import sys
 
 import sys
 from loguru import logger
@@ -519,10 +520,15 @@ def main():
         res = step(state)
         if isinstance(res, str):
             print(res)
+            # Print trace in a readable format
+            print("[", end="")
+            for t in trace:
+                print(t, end=", ")
+            print("]")
+            
             break
     else:
         print("*")
-    return(trace)
 
 if __name__ == "__main__":
     main()
