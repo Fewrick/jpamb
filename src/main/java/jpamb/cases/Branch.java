@@ -4,13 +4,6 @@ import jpamb.utils.Case;
 
 public class Branch {
 
-    @Case("(1) -> ok")
-    @Case("(-1) -> assertion error")
-    @Case("(0) -> assertion error")
-    public static void positive(int x) {
-        assert x > 0 : "number must be positive";
-    }
-
     @Case("(\"a1b2c3\") -> ok")
     @Case("(\"a1b2c4\") -> assertion error")
     @Case("(\"11b2c3\") -> assertion error")
@@ -42,11 +35,35 @@ public class Branch {
         }
 
         if (sum == 6) {
-            if (!expectLetter) { 
+            if (!expectLetter) {
                 return;
             }
         }
         assert false : "invalid sum or incomplete sequence";
+    }
+
+    @Case("(\"PA02242\") -> ok")
+    @Case("(\"PA02243\") -> assertion error")
+    @Case("(\"PB02242\") -> assertion error")
+    @Case("(\"PA0224\") -> assertion error")
+    public static void fireTheNukes(String input) {
+        // Format: "PA" + "02242"
+        if (input == null)
+            assert false;
+        if (input.length() == 7) {
+            if (input.charAt(0) == 'P' && input.charAt(1) == 'A') {
+                String numberPart = input.substring(2);
+                if (numberPart.equals("02242")) {
+                    return;
+                } else {
+                    assert false : "invalid code number";
+                }
+            } else {
+                assert false : "invalid code prefix";
+            }
+        } else {
+            assert false : "invalid code length";
+        }
     }
 
 }
