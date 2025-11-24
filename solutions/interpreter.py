@@ -12,6 +12,7 @@ logger.add(sys.stderr, format="[{level}] {message}")
 
 methodid, input = jpamb.getcase()
 
+# ┌ Case jpamb.cases.Simple.checkBeforeDivideByN2:(0) -> ok ------------------- This one is nor working anymore
 
 @dataclass
 class PC:
@@ -155,6 +156,16 @@ def step(state: State) -> State | str:
             frame.stack.push(jvm.Value.int(v1.value * v2.value))
             frame.pc += 1
             return state
+        
+        case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Rem): # Binary remainder
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            assert v1.type is jvm.Int(), f"expected int, but got {v1}"
+            assert v2.type is jvm.Int(), f"expected int, but got {v2}"
+            if v2.value == 0:
+                return "divide by zero"
+            frame.stack.push(jvm.Value.int(v1.value % v2.value))
+            frame.pc += 1
+            return state
 
         case jvm.Return(type=jvm.Int()):
             v1 = frame.stack.pop()
@@ -254,6 +265,22 @@ def step(state: State) -> State | str:
             v = frame.stack.peek()
             frame.stack.push(v)
             frame.pc += 1
+            return state
+        
+        case jvm.InvokeStatic(method=mid):
+            logger.debug(f"InvokeStatic: classname={mid.classname.dotted()}, method={mid.extension.name}")
+
+            params = getattr(mid.extension, "params", None)
+            param_elems = getattr(params, "_elements", ()) if params is not None else ()
+            param_count = len(param_elems)
+
+            args = [frame.stack.pop() for _ in range(param_count)][::-1]
+
+            callee = Frame.from_method(mid)
+            for i, a in enumerate(args):
+                callee.locals[i] = a
+
+            state.frames.push(callee)
             return state
         
         case jvm.InvokeSpecial(method=mid):
@@ -389,11 +416,23 @@ def step(state: State) -> State | str:
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
+            if cond == 'lt': # Less than
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value < v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            if cond == 'le': # Less than or equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value <= v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
                 
             return state
         
         case jvm.Store(type=jvm.Int(), index=i):
-            v = frame.stack.pop()
+            v = frame.stack.peek()
             frame.locals[i] = v
             frame.pc += 1
             return state
@@ -425,7 +464,7 @@ def step(state: State) -> State | str:
             try:
                 state.heap[array_ref.value][index.value] = value.value
             except Exception as e:
-                return "assertion error"
+                return "out of bounds"
             frame.pc += 1
             return state
         
@@ -485,7 +524,31 @@ def step(state: State) -> State | str:
             frame.pc += 1
             return state
         
+        # case jvm.Value(type=jvm.Array(contains=jvm.Int()), value=vals):
+        #     # vals may be a tuple of ints or jvm.Value(int, ...)
+        #     array_ref = len(state.heap)
+        #     elements = []
+        #     for item in vals:
+        #         if isinstance(item, jvm.Value):
+        #             if item.type is jvm.Int():
+        #                 elements.append(item.value)
+        #             else:
+        #                 raise NotImplementedError(f"array contains unsupported value: {item}")
+        #         else:
+        #             # assume a plain python int
+        #             elements.append(item)
+        #     state.heap[array_ref] = elements
+        #     frame.stack.push(jvm.Value(jvm.Reference(), array_ref))
+        #     frame.pc += 1
+        #     return state
 
+        case jvm.Incr(index=i, amount=c):
+            v = frame.locals[i]
+            assert v.type is jvm.Int(), f"expected int, but got {v}"
+            frame.locals[i] = jvm.Value.int(v.value + c)
+            frame.pc += 1
+            return state
+        
         case a:
             # a.help()
             raise NotImplementedError(f"Don't know how to handle: {a!r}")
