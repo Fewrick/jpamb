@@ -10,6 +10,21 @@ from jpamb import jvm
 import re
 
 
+def string_to_array(arr_literal: str):
+    # Covert String to Array
+    s = arr_literal.strip()
+    if s.startswith("[") and s.endswith("]"):
+        s = s[1:-1]
+    parts = [p for p in re.split(r"[,\s]+", s) if p]
+    array = []
+    for p in parts:
+        try:
+            array.append(int(p))
+        except ValueError:
+            # ignore non-integer tokens
+            pass
+    return array
+
 def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
     """Run `solutions/interpreter.py` with the given method id and input string.
 
@@ -28,18 +43,8 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         msg = lines[0] if len(lines) > 0 else ""
         arr_literal = lines[1] if len(lines) > 1 else "[]"
 
-        # parse arr_literal like "[1, 2, 3]" or "1,2,3" or "1 2 3" into a list of ints
-        s = arr_literal.strip()
-        if s.startswith("[") and s.endswith("]"):
-            s = s[1:-1]
-        parts = [p for p in re.split(r"[,\s]+", s) if p]
-        arr = []
-        for p in parts:
-            try:
-                arr.append(int(p))
-            except ValueError:
-                # ignore non-integer tokens
-                pass
+        trace = string_to_array(arr_literal)
+        print("trace: {trace}")
 
         return proc.returncode, proc.stdout, proc.stderr
     else:
