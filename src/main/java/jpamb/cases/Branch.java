@@ -66,4 +66,45 @@ public class Branch {
         }
     }
 
+    @Case("(This1GoesDeep) -> ok")
+    @Case("() -> assertion error")
+    @Case("(This1GoesDeeper) -> assertion error")
+    @Case("(This2GoesDeep) -> assertion error")
+    public static void deepNesting(String input) {
+        // Expects "This1GoesDeep"
+        if (input == null)
+            assert false;
+        if (input.length() == 0)
+            assert false;
+
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (c == 'T') {
+                if (i + 3 < input.length() && input.substring(i, i + 4).equals("This")) {
+                    i += 3;
+                    continue;
+                } else {
+                    assert false : "expected 'This' at index " + i;
+                }
+            } else if (c == '1') {
+                continue;
+            } else if (c == 'G') {
+                if (i + 3 < input.length() && input.substring(i, i + 4).equals("Goes")) {
+                    i += 3;
+                    continue;
+                } else {
+                    assert false : "expected 'Goes' at index " + i;
+                }
+            } else if (c == 'D') {
+                if (i + 3 < input.length() && input.substring(i, i + 4).equals("Deep")) {
+                    i += 3;
+                    continue;
+                } else {
+                    assert false : "expected 'Deep' at index " + i;
+                }
+            } else {
+                assert false : "unexpected character '" + c + "' at index " + i;
+            }
+        }
+    }
 }
