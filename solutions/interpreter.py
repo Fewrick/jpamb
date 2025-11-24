@@ -13,6 +13,8 @@ logger.add(sys.stderr, format="[{level}] {message}")
 methodid, input = jpamb.getcase()
 
 # ┌ Case jpamb.cases.Simple.checkBeforeDivideByN2:(0) -> ok ------------------- This one is nor working anymore
+# uv run solutions/interpreter.py "jpamb.cases.Simple.checkBeforeDivideByN2:(I)I" "(0)"
+
 
 @dataclass
 class PC:
@@ -115,6 +117,11 @@ def step(state: State) -> State | str:
             frame.pc += 1
             return state
         
+        case jvm.Load(type=jvm.Float(), index=i):
+            frame.stack.push(frame.locals[i])
+            frame.pc += 1
+            return state
+        
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Div): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             # assert v2.value > 0, "Helooooo we need to do something here!!!"
@@ -164,6 +171,50 @@ def step(state: State) -> State | str:
             if v2.value == 0:
                 return "divide by zero"
             frame.stack.push(jvm.Value.int(v1.value % v2.value))
+            frame.pc += 1
+            return state
+        
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Add):  # Float addition
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            frame.stack.push(jvm.Value.float(v1.value + v2.value))
+            frame.pc += 1
+            return state
+
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Sub):  # Float subtraction
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            frame.stack.push(jvm.Value.float(v1.value - v2.value))
+            frame.pc += 1
+            return state
+
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Mul):  # Float multiplication
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            frame.stack.push(jvm.Value.float(v1.value * v2.value))
+            frame.pc += 1
+            return state
+
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Div):  # Float division
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            if v2.value == 0.0:
+                return "divide by zero"
+            frame.stack.push(jvm.Value.float(v1.value / v2.value))
+            frame.pc += 1
+            return state
+        
+        case jvm.CompareFloating(type=typ, nan_value=nan_val):
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            
+            # Compare the two float values
+            if v1.value > v2.value:
+                result = 1
+            elif v1.value < v2.value:
+                result = -1
+            elif v1.value == v2.value:
+                result = 0
+            else:
+                # One or both are NaN
+                result = nan_val
+            
+            frame.stack.push(jvm.Value.int(result))
             frame.pc += 1
             return state
 
@@ -560,6 +611,8 @@ for i, v in enumerate(input.values):
     
     match v: 
         case jvm.Value(type=jvm.Int(), value = value):
+            v = v
+        case jvm.Value(type=jvm.Float(), value = value):
             v = v
         case jvm.Value(type=jvm.Boolean(), value = value):
             logger.debug(f"converting boolean {value} to int")
