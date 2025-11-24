@@ -229,6 +229,17 @@ def step(state: State) -> State | str:
             else:
                 return "ok"
             
+        case jvm.Return(type=jvm.Reference()):
+            v1 = frame.stack.pop()
+            state.frames.pop()
+            if state.frames:
+                frame = state.frames.peek()
+                frame.stack.push(v1)
+                frame.pc += 1
+                return state
+            else:
+                return "ok"
+            
         case jvm.Return(type=None):
             state.frames.pop()
             if state.frames:
