@@ -12,6 +12,7 @@ logger.add(sys.stderr, format="[{level}] {message}")
 
 methodid, input = jpamb.getcase()
 
+trace = []
 
 @dataclass
 class PC:
@@ -102,6 +103,9 @@ def step(state: State) -> State | str:
     assert isinstance(state, State), f"expected frame but got {state}"
     frame = state.frames.peek()
     opr = bc[frame.pc]
+    
+    trace.append(str(frame.pc.offset))
+
     logger.debug(f"STEP {opr}\n{state}")
     match opr:
         case jvm.Push(value=v):
@@ -509,13 +513,16 @@ for i, v in enumerate(input.values):
             raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
     frame.locals[i] = v
 
-state.frames.push(frame)
-##state = State({}, Stack.empty().push(frame))
+def main():
+    state.frames.push(frame)
+    for _ in range(1000):
+        res = step(state)
+        if isinstance(res, str):
+            print(res)
+            break
+    else:
+        print("*")
+    return(trace)
 
-for x in range(1000):
-    state = step(state)
-    if isinstance(state, str):
-        print(state)
-        break
-else:
-    print("*")
+if __name__ == "__main__":
+    main()
