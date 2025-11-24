@@ -238,6 +238,12 @@ def step(state: State) -> State | str:
                 frame.pc += 1
                 return state
             else:
+                if isinstance(v1.type, jvm.String):
+                    return v1.value
+                elif v1.value in state.heap:
+                    obj = state.heap[v1.value]
+                    if isinstance(obj, dict) and "java" in obj.get("class", "").lower() and "string" in obj.get("class", "").lower():
+                        return obj.get("value", "ok")
                 return "ok"
             
         case jvm.Return(type=None):
@@ -358,27 +364,28 @@ def step(state: State) -> State | str:
                 # Handle other special methods
                 frame.pc += 1
                 return state
+            
         case jvm.InvokeVirtual(method=mid):
             logger.debug(f"InvokeVirtual: classname={mid.classname.dotted()}, method={mid.extension.name}")
-            # Handle String methods
             if str(mid.classname) == "java/lang/String" or str(mid.classname) == "java.lang.String":
-                obj_ref = frame.stack.pop()  
-                
-                if obj_ref.value is None:
-                    return "null pointer"
-                
-                string_obj = state.heap[obj_ref.value]
-                string_value = string_obj.get("value", "")
                 
                 if mid.extension.name == "length":
-                    #returns int
+                    string_ref = frame.stack.pop()  
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     length = len(string_value)
                     frame.stack.push(jvm.Value.int(length))
                     frame.pc += 1
                     return state
                     
                 elif mid.extension.name == "toUpperCase":
-                    #returns String
+                    string_ref = frame.stack.pop() 
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     upper = string_value.upper()
                     new_string_ref = len(state.heap)
                     state.heap[new_string_ref] = {"class": "java.lang.String", "value": upper}
@@ -387,7 +394,12 @@ def step(state: State) -> State | str:
                     return state
                 
                 elif mid.extension.name == "charAt":
-                    index = frame.stack.pop()
+                    index = frame.stack.pop()  
+                    string_ref = frame.stack.pop()  
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     if 0 <= index.value < len(string_value):
                         char = string_value[index.value]
                         frame.stack.push(jvm.Value.int(ord(char)))
@@ -397,8 +409,12 @@ def step(state: State) -> State | str:
                     return state
                     
                 elif mid.extension.name == "equals":
-                    #returns boolean
-                    other_ref = frame.stack.pop()
+                    other_ref = frame.stack.pop()  
+                    string_ref = frame.stack.pop() 
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     if other_ref.value in state.heap:
                         other_obj = state.heap[other_ref.value]
                         other_value = other_obj.get("value", "")
@@ -408,9 +424,64 @@ def step(state: State) -> State | str:
                     frame.stack.push(jvm.Value.int(result))
                     frame.pc += 1
                     return state
+                
+                elif mid.extension.name == "substring":
+                    param_count = len(mid.extension.params._elements) if hasattr(mid.extension, 'params') and mid.extension.params else 0
+                    
+                    if param_count == 2:
+                        # substring(int beginIndex, int endIndex)
+                        end_idx = frame.stack.pop()    
+                        start_idx = frame.stack.pop()  
+                        string_ref = frame.stack.pop() 
+                        
+                        if string_ref.value is None:
+                            return "null pointer"
+                        string_obj = state.heap[string_ref.value]
+                        string_value = string_obj.get("value", "")
+                        
+                        result = string_value[start_idx.value:end_idx.value]
+                    elif param_count == 1:
+                        # substring(int beginIndex) - goes to end
+                        start_idx = frame.stack.pop()  
+                        string_ref = frame.stack.pop()  
+                        
+                        if string_ref.value is None:
+                            return "null pointer"
+                        string_obj = state.heap[string_ref.value]
+                        string_value = string_obj.get("value", "")
+                        
+                        result = string_value[start_idx.value:]  
+                    else:
+                        raise NotImplementedError(f"substring with {param_count} params not supported")
+                    
+                    new_ref = max(state.heap.keys()) + 1 if state.heap else 1
+                    state.heap[new_ref] = {'class': 'java.lang.String', 'value': result}
+                    frame.stack.push(jvm.Value(jvm.Reference(), new_ref))
+                    frame.pc += 1
+                    return state
+
                 raise NotImplementedError(f"String method {mid.extension.name} not implemented")
-        
             raise NotImplementedError(f"InvokeVirtual not implemented for {mid}")
+        
+        case jvm.InvokeDynamic(name=name, descriptor=descriptor):
+            if "makeConcat" in name:
+                args = []
+                num_args = descriptor.count('L') + descriptor.count('I') + descriptor.count('Z')
+                if num_args == 0:
+                    num_args = 1 
+                    
+                for _ in range(min(num_args, len(frame.stack.items))):
+                    if frame.stack.items:
+                        args.append(frame.stack.pop())
+                
+                args.reverse()
+                
+                result = "".join(str(arg.value) if hasattr(arg, 'value') else str(arg) for arg in args)
+                frame.stack.push(jvm.Value.string(result))
+                frame.pc += 1  
+                return state   
+            else:
+                raise NotImplementedError(f"Unhandled invokedynamic: {name}")
 
             
         case jvm.Throw():            
