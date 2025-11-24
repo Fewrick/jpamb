@@ -51,6 +51,8 @@ class Opcode(ABC):
                 opr = Store
             case "load":
                 opr = Load
+            case "comparefloating":
+                opr = CompareFloating
             case "arraylength":
                 opr = ArrayLength
             case "if":
@@ -686,6 +688,46 @@ class Load(Opcode):
     def __str__(self):
         return f"load:{self.type} {self.index}"
 
+@dataclass(frozen=True, order=True)
+class CompareFloating(Opcode):
+    """The fcmp opcode that compares two floating point values.
+    
+    According to JVM spec:
+    - Pops two float values from stack
+    - Compares them and pushes result (-1, 0, or 1) onto stack
+    - fcmpg: pushes 1 if either value is NaN
+    - fcmpl: pushes -1 if either value is NaN
+    """
+    
+    type: jvm.Type  # Should be Float or Double
+    nan_value: int  # -1 for fcmpl, 1 for fcmpg
+    
+    @classmethod
+    def from_json(cls, json: dict) -> "Opcode":
+        
+        return cls(
+            offset=json["offset"],
+            type=jvm.Type.from_json(json["type"]),
+            nan_value=json["onnan"] 
+        )
+    
+    def real(self) -> str:
+        match self.type:
+            case jvm.Float():
+                return "fcmpg" if self.nan_value == 1 else "fcmpl"
+            case jvm.Double():
+                return "dcmpg" if self.nan_value == 1 else "dcmpl"
+        return super().real()
+    
+    def semantics(self) -> str | None:
+        return None
+    
+    def mnemonic(self) -> str:
+        return self.real()
+    
+    def __str__(self):
+        suffix = "g" if self.nan_value == 1 else "l"
+        return f"fcmp{suffix} {self.type}"
 
 @dataclass(frozen=True, order=True)
 class If(Opcode):
