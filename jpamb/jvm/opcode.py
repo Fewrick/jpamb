@@ -51,6 +51,8 @@ class Opcode(ABC):
                 opr = Store
             case "load":
                 opr = Load
+            case "comparefloating":
+                opr = CompareFloating
             case "arraylength":
                 opr = ArrayLength
             case "if":
@@ -81,6 +83,8 @@ class Opcode(ABC):
                         opr = InvokeInterface
                     case "special":
                         opr = InvokeSpecial
+                    case "dynamic":
+                        opr = InvokeDynamic
                     case access:
                         raise NotImplementedError(
                             f"Unhandled invoke access {access!r} (implement yourself)"
@@ -542,6 +546,57 @@ class InvokeSpecial(Opcode):
         interface_str = " interface" if self.is_interface else ""
         return f"invoke special{interface_str} {self.method}"
 
+@dataclass(frozen=True, order=True)
+class InvokeDynamic(Opcode):
+    """The invokedynamic opcode for dynamic method invocation.
+    
+    According to the JVM spec, invokedynamic:
+    - Dynamically computes the target method at runtime
+    - Uses a bootstrap method to determine the call site
+    - Common uses: string concatenation (Java 9+), lambda expressions
+    - The call site is resolved once and cached for subsequent invocations
+    """
+    
+    name: str  # Method name (e.g., "makeConcatWithConstants")
+    descriptor: str  # Method descriptor/signature
+    bootstrap_index: int  # Index into the bootstrap methods table
+    
+    @classmethod
+    def from_json(cls, json: dict) -> "Opcode":
+        assert json["opr"] == "invoke" and json["access"] == "dynamic"
+        
+        # For invokedynamic, the structure is different
+        # It typically has "method" with "name" and "type" directly
+        method_info = json["method"]
+        
+        return cls(
+            offset=json["offset"],
+            name=method_info.get("name", "unknown"),
+            descriptor=str(method_info.get("type", "")),
+            bootstrap_index=json.get("bootstrap_index", 0)
+        )
+    
+    def real(self) -> str:
+        return f"invokedynamic {self.name} {self.descriptor}"
+    
+    def semantics(self) -> str | None:
+        semantics = """
+        bc[i].opr = 'invoke'
+        bc[i].access = 'dynamic'
+        bc[i].name = n
+        bc[i].descriptor = d
+        bc[i].bootstrap_index = b
+        -------------------------[invokedynamic]
+        bc |- (i, s + args) -> (i+1, s + [result])
+        where the target method is determined by bootstrap method b
+        """
+        return None
+    
+    def mnemonic(self) -> str:
+        return "invokedynamic"
+    
+    def __str__(self):
+        return f"invoke dynamic {self.name} {self.descriptor} (bootstrap={self.bootstrap_index})"
 
 @dataclass(frozen=True, order=True)
 class Store(Opcode):
@@ -686,6 +741,46 @@ class Load(Opcode):
     def __str__(self):
         return f"load:{self.type} {self.index}"
 
+@dataclass(frozen=True, order=True)
+class CompareFloating(Opcode):
+    """The fcmp opcode that compares two floating point values.
+    
+    According to JVM spec:
+    - Pops two float values from stack
+    - Compares them and pushes result (-1, 0, or 1) onto stack
+    - fcmpg: pushes 1 if either value is NaN
+    - fcmpl: pushes -1 if either value is NaN
+    """
+    
+    type: jvm.Type  # Should be Float or Double
+    nan_value: int  # -1 for fcmpl, 1 for fcmpg
+    
+    @classmethod
+    def from_json(cls, json: dict) -> "Opcode":
+        
+        return cls(
+            offset=json["offset"],
+            type=jvm.Type.from_json(json["type"]),
+            nan_value=json["onnan"] 
+        )
+    
+    def real(self) -> str:
+        match self.type:
+            case jvm.Float():
+                return "fcmpg" if self.nan_value == 1 else "fcmpl"
+            case jvm.Double():
+                return "dcmpg" if self.nan_value == 1 else "dcmpl"
+        return super().real()
+    
+    def semantics(self) -> str | None:
+        return None
+    
+    def mnemonic(self) -> str:
+        return self.real()
+    
+    def __str__(self):
+        suffix = "g" if self.nan_value == 1 else "l"
+        return f"fcmp{suffix} {self.type}"
 
 @dataclass(frozen=True, order=True)
 class If(Opcode):

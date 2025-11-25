@@ -30,4 +30,10 @@ public class Strings {
       assert input.length() > 0 : "input must not be empty";
       assert input.charAt(0) == 'h' : "input must start with 'h'";
   }
+  @Case("() -> assertion error")
+  @Case("(\"ProgramAnalysis\") -> ok")
+  public static void spellsExactlyProgramAnalysis(String input) {
+      assert input != null : "input must not be null";
+      assert input.equals("ProgramAnalysis") : "string does not match 'ProgramAnalysis'";
+  }
 }

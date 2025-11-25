@@ -91,5 +91,47 @@ public class Loops {
       }
       return "too big";
   }
+  @Case("(5, true) -> pass")
+  @Case("(5, false) -> fail")
+  @Case("(15, false) -> pass")
+  @Case("(15, true) -> excellent")
+  public static String examResult(int score, boolean extraCredit) {
+      if (extraCredit) {
+          score = score + 10;
+      }
+      if (score >= 20) {
+          return "excellent";
+      }
+      if (score >= 10) {
+          return "pass";
+      }
+      return "fail";
+  }
 
+  @Case("(100, 50) -> first wins")
+  @Case("(50, 100) -> second wins")
+  @Case("(75, 75) -> tie")
+  public static String compareScores(int score1, int score2) {
+      if (score1 > score2) {
+          return "first wins";
+      }
+      if (score2 > score1) {
+          return "second wins";
+      }
+      return "tie";
+  }
+
+  @Case("(5, 10, 3) -> medium")
+  @Case("(15, 8, 12) -> high")
+  @Case("(2, 1, 1) -> low")
+  public static String averageCategory(int a, int b, int c) {
+      int avg = (a + b + c) / 3;
+      if (avg < 5) {
+          return "low";
+      }
+      if (avg < 10) {
+          return "medium";
+      }
+      return "high";
+  }
 }

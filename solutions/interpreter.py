@@ -15,6 +15,10 @@ methodid, input = jpamb.getcase()
 
 trace = []
 
+# ┌ Case jpamb.cases.Simple.checkBeforeDivideByN2:(0) -> ok ------------------- This one is nor working anymore
+# uv run solutions/interpreter.py "jpamb.cases.Simple.checkBeforeDivideByN2:(I)I" "(0)"
+
+
 @dataclass
 class PC:
     method: jvm.AbsMethodID
@@ -119,6 +123,11 @@ def step(state: State) -> State | str:
             frame.pc += 1
             return state
         
+        case jvm.Load(type=jvm.Float(), index=i):
+            frame.stack.push(frame.locals[i])
+            frame.pc += 1
+            return state
+        
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Div): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             # assert v2.value > 0, "Helooooo we need to do something here!!!"
@@ -160,6 +169,60 @@ def step(state: State) -> State | str:
             frame.stack.push(jvm.Value.int(v1.value * v2.value))
             frame.pc += 1
             return state
+        
+        case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Rem): # Binary remainder
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            assert v1.type is jvm.Int(), f"expected int, but got {v1}"
+            assert v2.type is jvm.Int(), f"expected int, but got {v2}"
+            if v2.value == 0:
+                return "divide by zero"
+            frame.stack.push(jvm.Value.int(v1.value % v2.value))
+            frame.pc += 1
+            return state
+        
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Add):  # Float addition
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            frame.stack.push(jvm.Value.float(v1.value + v2.value))
+            frame.pc += 1
+            return state
+
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Sub):  # Float subtraction
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            frame.stack.push(jvm.Value.float(v1.value - v2.value))
+            frame.pc += 1
+            return state
+
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Mul):  # Float multiplication
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            frame.stack.push(jvm.Value.float(v1.value * v2.value))
+            frame.pc += 1
+            return state
+
+        case jvm.Binary(type=jvm.Float(), operant=jvm.BinaryOpr.Div):  # Float division
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            if v2.value == 0.0:
+                return "divide by zero"
+            frame.stack.push(jvm.Value.float(v1.value / v2.value))
+            frame.pc += 1
+            return state
+        
+        case jvm.CompareFloating(type=typ, nan_value=nan_val):
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            
+            # Compare the two float values
+            if v1.value > v2.value:
+                result = 1
+            elif v1.value < v2.value:
+                result = -1
+            elif v1.value == v2.value:
+                result = 0
+            else:
+                # One or both are NaN
+                result = nan_val
+            
+            frame.stack.push(jvm.Value.int(result))
+            frame.pc += 1
+            return state
 
         case jvm.Return(type=jvm.Int()):
             v1 = frame.stack.pop()
@@ -170,6 +233,23 @@ def step(state: State) -> State | str:
                 frame.pc += 1
                 return state
             else:
+                return "ok"
+            
+        case jvm.Return(type=jvm.Reference()):
+            v1 = frame.stack.pop()
+            state.frames.pop()
+            if state.frames:
+                frame = state.frames.peek()
+                frame.stack.push(v1)
+                frame.pc += 1
+                return state
+            else:
+                if isinstance(v1.type, jvm.String):
+                    return v1.value
+                elif v1.value in state.heap:
+                    obj = state.heap[v1.value]
+                    if isinstance(obj, dict) and "java" in obj.get("class", "").lower() and "string" in obj.get("class", "").lower():
+                        return obj.get("value", "ok")
                 return "ok"
             
         case jvm.Return(type=None):
@@ -261,6 +341,22 @@ def step(state: State) -> State | str:
             frame.pc += 1
             return state
         
+        case jvm.InvokeStatic(method=mid):
+            logger.debug(f"InvokeStatic: classname={mid.classname.dotted()}, method={mid.extension.name}")
+
+            params = getattr(mid.extension, "params", None)
+            param_elems = getattr(params, "_elements", ()) if params is not None else ()
+            param_count = len(param_elems)
+
+            args = [frame.stack.pop() for _ in range(param_count)][::-1]
+
+            callee = Frame.from_method(mid)
+            for i, a in enumerate(args):
+                callee.locals[i] = a
+
+            state.frames.push(callee)
+            return state
+        
         case jvm.InvokeSpecial(method=mid):
             method_name = mid.extension.name
             if method_name == "<init>":
@@ -274,27 +370,28 @@ def step(state: State) -> State | str:
                 # Handle other special methods
                 frame.pc += 1
                 return state
+            
         case jvm.InvokeVirtual(method=mid):
             logger.debug(f"InvokeVirtual: classname={mid.classname.dotted()}, method={mid.extension.name}")
-            # Handle String methods
             if str(mid.classname) == "java/lang/String" or str(mid.classname) == "java.lang.String":
-                obj_ref = frame.stack.pop()  
-                
-                if obj_ref.value is None:
-                    return "null pointer"
-                
-                string_obj = state.heap[obj_ref.value]
-                string_value = string_obj.get("value", "")
                 
                 if mid.extension.name == "length":
-                    #returns int
+                    string_ref = frame.stack.pop()  
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     length = len(string_value)
                     frame.stack.push(jvm.Value.int(length))
                     frame.pc += 1
                     return state
                     
                 elif mid.extension.name == "toUpperCase":
-                    #returns String
+                    string_ref = frame.stack.pop() 
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     upper = string_value.upper()
                     new_string_ref = len(state.heap)
                     state.heap[new_string_ref] = {"class": "java.lang.String", "value": upper}
@@ -303,7 +400,12 @@ def step(state: State) -> State | str:
                     return state
                 
                 elif mid.extension.name == "charAt":
-                    index = frame.stack.pop()
+                    index = frame.stack.pop()  
+                    string_ref = frame.stack.pop()  
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     if 0 <= index.value < len(string_value):
                         char = string_value[index.value]
                         frame.stack.push(jvm.Value.int(ord(char)))
@@ -313,8 +415,12 @@ def step(state: State) -> State | str:
                     return state
                     
                 elif mid.extension.name == "equals":
-                    #returns boolean
-                    other_ref = frame.stack.pop()
+                    other_ref = frame.stack.pop()  
+                    string_ref = frame.stack.pop() 
+                    if string_ref.value is None:
+                        return "null pointer"
+                    string_obj = state.heap[string_ref.value]
+                    string_value = string_obj.get("value", "")
                     if other_ref.value in state.heap:
                         other_obj = state.heap[other_ref.value]
                         other_value = other_obj.get("value", "")
@@ -324,9 +430,64 @@ def step(state: State) -> State | str:
                     frame.stack.push(jvm.Value.int(result))
                     frame.pc += 1
                     return state
+                
+                elif mid.extension.name == "substring":
+                    param_count = len(mid.extension.params._elements) if hasattr(mid.extension, 'params') and mid.extension.params else 0
+                    
+                    if param_count == 2:
+                        # substring(int beginIndex, int endIndex)
+                        end_idx = frame.stack.pop()    
+                        start_idx = frame.stack.pop()  
+                        string_ref = frame.stack.pop() 
+                        
+                        if string_ref.value is None:
+                            return "null pointer"
+                        string_obj = state.heap[string_ref.value]
+                        string_value = string_obj.get("value", "")
+                        
+                        result = string_value[start_idx.value:end_idx.value]
+                    elif param_count == 1:
+                        # substring(int beginIndex) - goes to end
+                        start_idx = frame.stack.pop()  
+                        string_ref = frame.stack.pop()  
+                        
+                        if string_ref.value is None:
+                            return "null pointer"
+                        string_obj = state.heap[string_ref.value]
+                        string_value = string_obj.get("value", "")
+                        
+                        result = string_value[start_idx.value:]  
+                    else:
+                        raise NotImplementedError(f"substring with {param_count} params not supported")
+                    
+                    new_ref = max(state.heap.keys()) + 1 if state.heap else 1
+                    state.heap[new_ref] = {'class': 'java.lang.String', 'value': result}
+                    frame.stack.push(jvm.Value(jvm.Reference(), new_ref))
+                    frame.pc += 1
+                    return state
+
                 raise NotImplementedError(f"String method {mid.extension.name} not implemented")
-        
             raise NotImplementedError(f"InvokeVirtual not implemented for {mid}")
+        
+        case jvm.InvokeDynamic(name=name, descriptor=descriptor):
+            if "makeConcat" in name:
+                args = []
+                num_args = descriptor.count('L') + descriptor.count('I') + descriptor.count('Z')
+                if num_args == 0:
+                    num_args = 1 
+                    
+                for _ in range(min(num_args, len(frame.stack.items))):
+                    if frame.stack.items:
+                        args.append(frame.stack.pop())
+                
+                args.reverse()
+                
+                result = "".join(str(arg.value) if hasattr(arg, 'value') else str(arg) for arg in args)
+                frame.stack.push(jvm.Value.string(result))
+                frame.pc += 1  
+                return state   
+            else:
+                raise NotImplementedError(f"Unhandled invokedynamic: {name}")
 
             
         case jvm.Throw():            
@@ -394,11 +555,23 @@ def step(state: State) -> State | str:
                     frame.pc = PC(frame.pc.method, val)
                 else:
                     frame.pc += 1
+            if cond == 'lt': # Less than
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value < v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
+            if cond == 'le': # Less than or equal
+                v2, v1 = frame.stack.pop(), frame.stack.pop()
+                if v1.value <= v2.value:
+                    frame.pc = PC(frame.pc.method, val)
+                else:
+                    frame.pc += 1
                 
             return state
         
         case jvm.Store(type=jvm.Int(), index=i):
-            v = frame.stack.pop()
+            v = frame.stack.peek()
             frame.locals[i] = v
             frame.pc += 1
             return state
@@ -430,7 +603,7 @@ def step(state: State) -> State | str:
             try:
                 state.heap[array_ref.value][index.value] = value.value
             except Exception as e:
-                return "assertion error"
+                return "out of bounds"
             frame.pc += 1
             return state
         
@@ -490,7 +663,31 @@ def step(state: State) -> State | str:
             frame.pc += 1
             return state
         
+        # case jvm.Value(type=jvm.Array(contains=jvm.Int()), value=vals):
+        #     # vals may be a tuple of ints or jvm.Value(int, ...)
+        #     array_ref = len(state.heap)
+        #     elements = []
+        #     for item in vals:
+        #         if isinstance(item, jvm.Value):
+        #             if item.type is jvm.Int():
+        #                 elements.append(item.value)
+        #             else:
+        #                 raise NotImplementedError(f"array contains unsupported value: {item}")
+        #         else:
+        #             # assume a plain python int
+        #             elements.append(item)
+        #     state.heap[array_ref] = elements
+        #     frame.stack.push(jvm.Value(jvm.Reference(), array_ref))
+        #     frame.pc += 1
+        #     return state
 
+        case jvm.Incr(index=i, amount=c):
+            v = frame.locals[i]
+            assert v.type is jvm.Int(), f"expected int, but got {v}"
+            frame.locals[i] = jvm.Value.int(v.value + c)
+            frame.pc += 1
+            return state
+        
         case a:
             # a.help()
             raise NotImplementedError(f"Don't know how to handle: {a!r}")
@@ -502,6 +699,8 @@ for i, v in enumerate(input.values):
     
     match v: 
         case jvm.Value(type=jvm.Int(), value = value):
+            v = v
+        case jvm.Value(type=jvm.Float(), value = value):
             v = v
         case jvm.Value(type=jvm.Boolean(), value = value):
             logger.debug(f"converting boolean {value} to int")

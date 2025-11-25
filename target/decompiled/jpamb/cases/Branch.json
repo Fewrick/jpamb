@@ -1,0 +1,3268 @@
+{
+  "access": [
+    "public",
+    "super"
+  ],
+  "annotations": [],
+  "bootstrapmethods": [
+    {
+      "index": 0,
+      "method": {
+        "args": [
+          {
+            "type": "string",
+            "value": "expected letter at index \u0001"
+          }
+        ],
+        "handle": {
+          "handletype": "method",
+          "kind": "static",
+          "method": {
+            "args": [
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodHandles$Lookup"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodType"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "array",
+                "type": {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              }
+            ],
+            "is_interface": false,
+            "name": "makeConcatWithConstants",
+            "ref": {
+              "kind": "class",
+              "name": "java/lang/invoke/StringConcatFactory"
+            },
+            "returns": {
+              "kind": "class",
+              "name": "java/lang/invoke/CallSite"
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 1,
+      "method": {
+        "args": [
+          {
+            "type": "string",
+            "value": "expected digit at index \u0001"
+          }
+        ],
+        "handle": {
+          "handletype": "method",
+          "kind": "static",
+          "method": {
+            "args": [
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodHandles$Lookup"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodType"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "array",
+                "type": {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              }
+            ],
+            "is_interface": false,
+            "name": "makeConcatWithConstants",
+            "ref": {
+              "kind": "class",
+              "name": "java/lang/invoke/StringConcatFactory"
+            },
+            "returns": {
+              "kind": "class",
+              "name": "java/lang/invoke/CallSite"
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 2,
+      "method": {
+        "args": [
+          {
+            "type": "string",
+            "value": "expected 'This' at index \u0001"
+          }
+        ],
+        "handle": {
+          "handletype": "method",
+          "kind": "static",
+          "method": {
+            "args": [
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodHandles$Lookup"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodType"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "array",
+                "type": {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              }
+            ],
+            "is_interface": false,
+            "name": "makeConcatWithConstants",
+            "ref": {
+              "kind": "class",
+              "name": "java/lang/invoke/StringConcatFactory"
+            },
+            "returns": {
+              "kind": "class",
+              "name": "java/lang/invoke/CallSite"
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 3,
+      "method": {
+        "args": [
+          {
+            "type": "string",
+            "value": "expected 'Goes' at index \u0001"
+          }
+        ],
+        "handle": {
+          "handletype": "method",
+          "kind": "static",
+          "method": {
+            "args": [
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodHandles$Lookup"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodType"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "array",
+                "type": {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              }
+            ],
+            "is_interface": false,
+            "name": "makeConcatWithConstants",
+            "ref": {
+              "kind": "class",
+              "name": "java/lang/invoke/StringConcatFactory"
+            },
+            "returns": {
+              "kind": "class",
+              "name": "java/lang/invoke/CallSite"
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 4,
+      "method": {
+        "args": [
+          {
+            "type": "string",
+            "value": "expected 'Deep' at index \u0001"
+          }
+        ],
+        "handle": {
+          "handletype": "method",
+          "kind": "static",
+          "method": {
+            "args": [
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodHandles$Lookup"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodType"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "array",
+                "type": {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              }
+            ],
+            "is_interface": false,
+            "name": "makeConcatWithConstants",
+            "ref": {
+              "kind": "class",
+              "name": "java/lang/invoke/StringConcatFactory"
+            },
+            "returns": {
+              "kind": "class",
+              "name": "java/lang/invoke/CallSite"
+            }
+          }
+        }
+      }
+    },
+    {
+      "index": 5,
+      "method": {
+        "args": [
+          {
+            "type": "string",
+            "value": "unexpected character '\u0001' at index \u0001"
+          }
+        ],
+        "handle": {
+          "handletype": "method",
+          "kind": "static",
+          "method": {
+            "args": [
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodHandles$Lookup"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/invoke/MethodType"
+              },
+              {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              {
+                "kind": "array",
+                "type": {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              }
+            ],
+            "is_interface": false,
+            "name": "makeConcatWithConstants",
+            "ref": {
+              "kind": "class",
+              "name": "java/lang/invoke/StringConcatFactory"
+            },
+            "returns": {
+              "kind": "class",
+              "name": "java/lang/invoke/CallSite"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "enclosingmethod": null,
+  "fields": [
+    {
+      "access": [
+        "static",
+        "final",
+        "synthetic"
+      ],
+      "annotations": [],
+      "name": "$assertionsDisabled",
+      "type": {
+        "annotations": [],
+        "base": "boolean"
+      },
+      "value": null
+    }
+  ],
+  "innerclasses": [
+    {
+      "access": [
+        "public",
+        "static",
+        "final"
+      ],
+      "class": "java/lang/invoke/MethodHandles$Lookup",
+      "name": "Lookup",
+      "outer": "java/lang/invoke/MethodHandles"
+    }
+  ],
+  "interfaces": [],
+  "methods": [
+    {
+      "access": [
+        "static"
+      ],
+      "annotations": [],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "offset": 0,
+            "opr": "push",
+            "value": {
+              "type": "class",
+              "value": {
+                "kind": "class",
+                "name": "jpamb/cases/Branch"
+              }
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "desiredAssertionStatus",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/Class"
+              },
+              "returns": "boolean"
+            },
+            "offset": 2,
+            "opr": "invoke"
+          },
+          {
+            "condition": "ne",
+            "offset": 5,
+            "opr": "ifz",
+            "target": 5
+          },
+          {
+            "offset": 8,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "offset": 9,
+            "opr": "goto",
+            "target": 6
+          },
+          {
+            "offset": 12,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 0
+            }
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 13,
+            "opr": "put",
+            "static": true
+          },
+          {
+            "offset": 16,
+            "opr": "return",
+            "type": null
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 5,
+            "offset": 0
+          }
+        ],
+        "max_locals": 0,
+        "max_stack": 1,
+        "stack_map": [
+          {
+            "index": 5,
+            "type": "same"
+          },
+          {
+            "index": 6,
+            "info": {
+              "type": "integer"
+            },
+            "type": "same_locals_1_stack_item_frame"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "<clinit>",
+      "params": [],
+      "returns": {
+        "annotations": [],
+        "type": null
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public"
+      ],
+      "annotations": [],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/Object"
+              },
+              "returns": null
+            },
+            "offset": 1,
+            "opr": "invoke"
+          },
+          {
+            "offset": 4,
+            "opr": "return",
+            "type": null
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 5,
+            "offset": 0
+          }
+        ],
+        "max_locals": 1,
+        "max_stack": 1,
+        "stack_map": null
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "<init>",
+      "params": [],
+      "returns": {
+        "annotations": [],
+        "type": null
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"a1b2c3\") -> ok"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"a1b2c4\") -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"11b2c3\") -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"a1b2\") -> assertion error"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "condition": "isnot",
+            "offset": 1,
+            "opr": "ifz",
+            "target": 8
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 4,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 7,
+            "opr": "ifz",
+            "target": 8
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 10,
+            "opr": "new"
+          },
+          {
+            "offset": 13,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 14,
+            "opr": "invoke"
+          },
+          {
+            "offset": 17,
+            "opr": "throw"
+          },
+          {
+            "offset": 18,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 0
+            }
+          },
+          {
+            "index": 1,
+            "offset": 19,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 20,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "index": 2,
+            "offset": 21,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 22,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 0
+            }
+          },
+          {
+            "index": 3,
+            "offset": 23,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 24,
+            "opr": "goto",
+            "target": 62
+          },
+          {
+            "index": 0,
+            "offset": 27,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "index": 3,
+            "offset": 28,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "charAt",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "char"
+            },
+            "offset": 29,
+            "opr": "invoke"
+          },
+          {
+            "index": 4,
+            "offset": 32,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "index": 2,
+            "offset": 34,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "condition": "eq",
+            "offset": 35,
+            "opr": "ifz",
+            "target": 38
+          },
+          {
+            "index": 4,
+            "offset": 38,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 40,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 48
+            }
+          },
+          {
+            "condition": "lt",
+            "offset": 42,
+            "opr": "if",
+            "target": 35
+          },
+          {
+            "index": 4,
+            "offset": 45,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 47,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 57
+            }
+          },
+          {
+            "condition": "gt",
+            "offset": 49,
+            "opr": "if",
+            "target": 35
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 52,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 55,
+            "opr": "ifz",
+            "target": 35
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 58,
+            "opr": "new"
+          },
+          {
+            "offset": 61,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "index": 3,
+            "offset": 62,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "dynamic",
+            "index": 0,
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "makeConcatWithConstants",
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 63,
+            "opr": "invoke"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 68,
+            "opr": "invoke"
+          },
+          {
+            "offset": 71,
+            "opr": "throw"
+          },
+          {
+            "offset": 72,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 0
+            }
+          },
+          {
+            "index": 2,
+            "offset": 73,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 74,
+            "opr": "goto",
+            "target": 61
+          },
+          {
+            "index": 4,
+            "offset": 77,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 79,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 48
+            }
+          },
+          {
+            "condition": "lt",
+            "offset": 81,
+            "opr": "if",
+            "target": 53
+          },
+          {
+            "index": 4,
+            "offset": 84,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 86,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 57
+            }
+          },
+          {
+            "condition": "gt",
+            "offset": 88,
+            "opr": "if",
+            "target": 53
+          },
+          {
+            "index": 1,
+            "offset": 91,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 4,
+            "offset": 92,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 94,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 48
+            }
+          },
+          {
+            "offset": 96,
+            "operant": "sub",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "offset": 97,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 98,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 99,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "index": 2,
+            "offset": 100,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 101,
+            "opr": "goto",
+            "target": 61
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 104,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 107,
+            "opr": "ifz",
+            "target": 61
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 110,
+            "opr": "new"
+          },
+          {
+            "offset": 113,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "index": 3,
+            "offset": 114,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "dynamic",
+            "index": 1,
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "makeConcatWithConstants",
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 115,
+            "opr": "invoke"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 120,
+            "opr": "invoke"
+          },
+          {
+            "offset": 123,
+            "opr": "throw"
+          },
+          {
+            "amount": 1,
+            "index": 3,
+            "offset": 124,
+            "opr": "incr"
+          },
+          {
+            "index": 3,
+            "offset": 127,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 0,
+            "offset": 128,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 129,
+            "opr": "invoke"
+          },
+          {
+            "condition": "lt",
+            "offset": 132,
+            "opr": "if",
+            "target": 15
+          },
+          {
+            "index": 1,
+            "offset": 135,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 136,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 6
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 138,
+            "opr": "if",
+            "target": 72
+          },
+          {
+            "index": 2,
+            "offset": 141,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "condition": "ne",
+            "offset": 142,
+            "opr": "ifz",
+            "target": 72
+          },
+          {
+            "offset": 145,
+            "opr": "return",
+            "type": null
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 146,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 149,
+            "opr": "ifz",
+            "target": 79
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 152,
+            "opr": "new"
+          },
+          {
+            "offset": 155,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "offset": 156,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "invalid sum or incomplete sequence"
+            }
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 158,
+            "opr": "invoke"
+          },
+          {
+            "offset": 161,
+            "opr": "throw"
+          },
+          {
+            "offset": 162,
+            "opr": "return",
+            "type": null
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 14,
+            "offset": 0
+          },
+          {
+            "line": 15,
+            "offset": 2
+          },
+          {
+            "line": 17,
+            "offset": 8
+          },
+          {
+            "line": 18,
+            "offset": 10
+          },
+          {
+            "line": 20,
+            "offset": 12
+          },
+          {
+            "line": 21,
+            "offset": 15
+          },
+          {
+            "line": 22,
+            "offset": 19
+          },
+          {
+            "line": 23,
+            "offset": 21
+          },
+          {
+            "line": 24,
+            "offset": 27
+          },
+          {
+            "line": 26,
+            "offset": 35
+          },
+          {
+            "line": 27,
+            "offset": 37
+          },
+          {
+            "line": 28,
+            "offset": 38
+          },
+          {
+            "line": 29,
+            "offset": 44
+          },
+          {
+            "line": 30,
+            "offset": 50
+          },
+          {
+            "line": 31,
+            "offset": 52
+          },
+          {
+            "line": 32,
+            "offset": 53
+          },
+          {
+            "line": 20,
+            "offset": 61
+          },
+          {
+            "line": 37,
+            "offset": 66
+          },
+          {
+            "line": 38,
+            "offset": 69
+          },
+          {
+            "line": 39,
+            "offset": 71
+          },
+          {
+            "line": 42,
+            "offset": 72
+          },
+          {
+            "line": 43,
+            "offset": 79
+          }
+        ],
+        "max_locals": 5,
+        "max_stack": 3,
+        "stack_map": [
+          {
+            "index": 8,
+            "type": "same"
+          },
+          {
+            "index": 15,
+            "info": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "append_frame"
+          },
+          {
+            "index": 35,
+            "info": [
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "append_frame"
+          },
+          {
+            "index": 38,
+            "type": "same"
+          },
+          {
+            "index": 53,
+            "type": "same"
+          },
+          {
+            "index": 61,
+            "info": 1,
+            "type": "chop_frame"
+          },
+          {
+            "index": 62,
+            "type": "same"
+          },
+          {
+            "index": 72,
+            "info": 1,
+            "type": "chop_frame"
+          },
+          {
+            "index": 79,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "alternatingSum",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "args": [],
+            "inner": null,
+            "kind": "class",
+            "name": "java/lang/String"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": null
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"PA02242\") -> ok"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"PA02243\") -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"PB02242\") -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(\"PA0224\") -> assertion error"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "condition": "isnot",
+            "offset": 1,
+            "opr": "ifz",
+            "target": 8
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 4,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 7,
+            "opr": "ifz",
+            "target": 8
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 10,
+            "opr": "new"
+          },
+          {
+            "offset": 13,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 14,
+            "opr": "invoke"
+          },
+          {
+            "offset": 17,
+            "opr": "throw"
+          },
+          {
+            "index": 0,
+            "offset": 18,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 19,
+            "opr": "invoke"
+          },
+          {
+            "offset": 22,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 7
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 24,
+            "opr": "if",
+            "target": 45
+          },
+          {
+            "index": 0,
+            "offset": 27,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "offset": 28,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 0
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "charAt",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "char"
+            },
+            "offset": 29,
+            "opr": "invoke"
+          },
+          {
+            "offset": 32,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 80
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 34,
+            "opr": "if",
+            "target": 38
+          },
+          {
+            "index": 0,
+            "offset": 37,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "offset": 38,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 1
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "charAt",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "char"
+            },
+            "offset": 39,
+            "opr": "invoke"
+          },
+          {
+            "offset": 42,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 65
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 44,
+            "opr": "if",
+            "target": 38
+          },
+          {
+            "index": 0,
+            "offset": 47,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "offset": 48,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 2
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "substring",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 49,
+            "opr": "invoke"
+          },
+          {
+            "index": 1,
+            "offset": 52,
+            "opr": "store",
+            "type": "ref"
+          },
+          {
+            "index": 1,
+            "offset": 53,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "offset": 54,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "02242"
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "name": "equals",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "boolean"
+            },
+            "offset": 56,
+            "opr": "invoke"
+          },
+          {
+            "condition": "eq",
+            "offset": 59,
+            "opr": "ifz",
+            "target": 31
+          },
+          {
+            "offset": 62,
+            "opr": "return",
+            "type": null
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 63,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 66,
+            "opr": "ifz",
+            "target": 52
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 69,
+            "opr": "new"
+          },
+          {
+            "offset": 72,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "offset": 73,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "invalid code number"
+            }
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 75,
+            "opr": "invoke"
+          },
+          {
+            "offset": 78,
+            "opr": "throw"
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 79,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 82,
+            "opr": "ifz",
+            "target": 52
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 85,
+            "opr": "new"
+          },
+          {
+            "offset": 88,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "offset": 89,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "invalid code prefix"
+            }
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 91,
+            "opr": "invoke"
+          },
+          {
+            "offset": 94,
+            "opr": "throw"
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 95,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 98,
+            "opr": "ifz",
+            "target": 52
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 101,
+            "opr": "new"
+          },
+          {
+            "offset": 104,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "offset": 105,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "invalid code length"
+            }
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 107,
+            "opr": "invoke"
+          },
+          {
+            "offset": 110,
+            "opr": "throw"
+          },
+          {
+            "offset": 111,
+            "opr": "return",
+            "type": null
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 51,
+            "offset": 0
+          },
+          {
+            "line": 52,
+            "offset": 2
+          },
+          {
+            "line": 53,
+            "offset": 8
+          },
+          {
+            "line": 54,
+            "offset": 12
+          },
+          {
+            "line": 55,
+            "offset": 22
+          },
+          {
+            "line": 56,
+            "offset": 26
+          },
+          {
+            "line": 57,
+            "offset": 30
+          },
+          {
+            "line": 59,
+            "offset": 31
+          },
+          {
+            "line": 62,
+            "offset": 38
+          },
+          {
+            "line": 65,
+            "offset": 45
+          },
+          {
+            "line": 67,
+            "offset": 52
+          }
+        ],
+        "max_locals": 2,
+        "max_stack": 3,
+        "stack_map": [
+          {
+            "index": 8,
+            "type": "same"
+          },
+          {
+            "index": 31,
+            "info": [
+              {
+                "ref": {
+                  "kind": "class",
+                  "name": "java/lang/String"
+                },
+                "type": "object"
+              }
+            ],
+            "type": "append_frame"
+          },
+          {
+            "index": 38,
+            "info": 1,
+            "type": "chop_frame"
+          },
+          {
+            "index": 45,
+            "type": "same"
+          },
+          {
+            "index": 52,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "fireTheNukes",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "args": [],
+            "inner": null,
+            "kind": "class",
+            "name": "java/lang/String"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": null
+      },
+      "typeparams": []
+    },
+    {
+      "access": [
+        "public",
+        "static"
+      ],
+      "annotations": [
+        {
+          "is_runtime_visible": true,
+          "type": "jpamb/utils/Cases",
+          "values": {
+            "value": {
+              "type": "array",
+              "value": [
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(This1GoesDeep) -> ok"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "() -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(This1GoesDeeper) -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(This2GoesDeep) -> assertion error"
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "code": {
+        "annotations": [],
+        "bytecode": [
+          {
+            "index": 0,
+            "offset": 0,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "condition": "isnot",
+            "offset": 1,
+            "opr": "ifz",
+            "target": 8
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 4,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 7,
+            "opr": "ifz",
+            "target": 8
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 10,
+            "opr": "new"
+          },
+          {
+            "offset": 13,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 14,
+            "opr": "invoke"
+          },
+          {
+            "offset": 17,
+            "opr": "throw"
+          },
+          {
+            "index": 0,
+            "offset": 18,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 19,
+            "opr": "invoke"
+          },
+          {
+            "condition": "ne",
+            "offset": 22,
+            "opr": "ifz",
+            "target": 17
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 25,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 28,
+            "opr": "ifz",
+            "target": 17
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 31,
+            "opr": "new"
+          },
+          {
+            "offset": 34,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 35,
+            "opr": "invoke"
+          },
+          {
+            "offset": 38,
+            "opr": "throw"
+          },
+          {
+            "offset": 39,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 0
+            }
+          },
+          {
+            "index": 1,
+            "offset": 40,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "offset": 41,
+            "opr": "goto",
+            "target": 122
+          },
+          {
+            "index": 0,
+            "offset": 44,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "index": 1,
+            "offset": 45,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "charAt",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "char"
+            },
+            "offset": 46,
+            "opr": "invoke"
+          },
+          {
+            "index": 2,
+            "offset": 49,
+            "opr": "store",
+            "type": "int"
+          },
+          {
+            "index": 2,
+            "offset": 50,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 51,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 84
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 53,
+            "opr": "if",
+            "target": 52
+          },
+          {
+            "index": 1,
+            "offset": 56,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 57,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 3
+            }
+          },
+          {
+            "offset": 58,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "index": 0,
+            "offset": 59,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 60,
+            "opr": "invoke"
+          },
+          {
+            "condition": "ge",
+            "offset": 63,
+            "opr": "if",
+            "target": 44
+          },
+          {
+            "index": 0,
+            "offset": 66,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "index": 1,
+            "offset": 67,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 68,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 69,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 4
+            }
+          },
+          {
+            "offset": 70,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int",
+                "int"
+              ],
+              "name": "substring",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 71,
+            "opr": "invoke"
+          },
+          {
+            "offset": 74,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "This"
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "name": "equals",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "boolean"
+            },
+            "offset": 76,
+            "opr": "invoke"
+          },
+          {
+            "condition": "eq",
+            "offset": 79,
+            "opr": "ifz",
+            "target": 44
+          },
+          {
+            "amount": 3,
+            "index": 1,
+            "offset": 82,
+            "opr": "incr"
+          },
+          {
+            "offset": 85,
+            "opr": "goto",
+            "target": 121
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 88,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 91,
+            "opr": "ifz",
+            "target": 121
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 94,
+            "opr": "new"
+          },
+          {
+            "offset": 97,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "index": 1,
+            "offset": 98,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "dynamic",
+            "index": 2,
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "makeConcatWithConstants",
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 99,
+            "opr": "invoke"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 104,
+            "opr": "invoke"
+          },
+          {
+            "offset": 107,
+            "opr": "throw"
+          },
+          {
+            "index": 2,
+            "offset": 108,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 109,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 49
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 111,
+            "opr": "if",
+            "target": 56
+          },
+          {
+            "offset": 114,
+            "opr": "goto",
+            "target": 121
+          },
+          {
+            "index": 2,
+            "offset": 117,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 118,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 71
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 120,
+            "opr": "if",
+            "target": 84
+          },
+          {
+            "index": 1,
+            "offset": 123,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 124,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 3
+            }
+          },
+          {
+            "offset": 125,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "index": 0,
+            "offset": 126,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 127,
+            "opr": "invoke"
+          },
+          {
+            "condition": "ge",
+            "offset": 130,
+            "opr": "if",
+            "target": 76
+          },
+          {
+            "index": 0,
+            "offset": 133,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "index": 1,
+            "offset": 134,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 135,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 136,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 4
+            }
+          },
+          {
+            "offset": 137,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int",
+                "int"
+              ],
+              "name": "substring",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 138,
+            "opr": "invoke"
+          },
+          {
+            "offset": 141,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "Goes"
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "name": "equals",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "boolean"
+            },
+            "offset": 143,
+            "opr": "invoke"
+          },
+          {
+            "condition": "eq",
+            "offset": 146,
+            "opr": "ifz",
+            "target": 76
+          },
+          {
+            "amount": 3,
+            "index": 1,
+            "offset": 149,
+            "opr": "incr"
+          },
+          {
+            "offset": 152,
+            "opr": "goto",
+            "target": 121
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 155,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 158,
+            "opr": "ifz",
+            "target": 121
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 161,
+            "opr": "new"
+          },
+          {
+            "offset": 164,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "index": 1,
+            "offset": 165,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "dynamic",
+            "index": 3,
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "makeConcatWithConstants",
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 166,
+            "opr": "invoke"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 171,
+            "opr": "invoke"
+          },
+          {
+            "offset": 174,
+            "opr": "throw"
+          },
+          {
+            "index": 2,
+            "offset": 175,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 176,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 68
+            }
+          },
+          {
+            "condition": "ne",
+            "offset": 178,
+            "opr": "if",
+            "target": 112
+          },
+          {
+            "index": 1,
+            "offset": 181,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 182,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 3
+            }
+          },
+          {
+            "offset": 183,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "index": 0,
+            "offset": 184,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 185,
+            "opr": "invoke"
+          },
+          {
+            "condition": "ge",
+            "offset": 188,
+            "opr": "if",
+            "target": 104
+          },
+          {
+            "index": 0,
+            "offset": 191,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "index": 1,
+            "offset": 192,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 193,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "offset": 194,
+            "opr": "push",
+            "value": {
+              "type": "integer",
+              "value": 4
+            }
+          },
+          {
+            "offset": 195,
+            "operant": "add",
+            "opr": "binary",
+            "type": "int"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                "int",
+                "int"
+              ],
+              "name": "substring",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 196,
+            "opr": "invoke"
+          },
+          {
+            "offset": 199,
+            "opr": "push",
+            "value": {
+              "type": "string",
+              "value": "Deep"
+            }
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "name": "equals",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "boolean"
+            },
+            "offset": 201,
+            "opr": "invoke"
+          },
+          {
+            "condition": "eq",
+            "offset": 204,
+            "opr": "ifz",
+            "target": 104
+          },
+          {
+            "amount": 3,
+            "index": 1,
+            "offset": 207,
+            "opr": "incr"
+          },
+          {
+            "offset": 210,
+            "opr": "goto",
+            "target": 121
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 213,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 216,
+            "opr": "ifz",
+            "target": 121
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 219,
+            "opr": "new"
+          },
+          {
+            "offset": 222,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "index": 1,
+            "offset": 223,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "dynamic",
+            "index": 4,
+            "method": {
+              "args": [
+                "int"
+              ],
+              "name": "makeConcatWithConstants",
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 224,
+            "opr": "invoke"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 229,
+            "opr": "invoke"
+          },
+          {
+            "offset": 232,
+            "opr": "throw"
+          },
+          {
+            "field": {
+              "class": "jpamb/cases/Branch",
+              "name": "$assertionsDisabled",
+              "type": "boolean"
+            },
+            "offset": 233,
+            "opr": "get",
+            "static": true
+          },
+          {
+            "condition": "ne",
+            "offset": 236,
+            "opr": "ifz",
+            "target": 121
+          },
+          {
+            "class": "java/lang/AssertionError",
+            "offset": 239,
+            "opr": "new"
+          },
+          {
+            "offset": 242,
+            "opr": "dup",
+            "words": 1
+          },
+          {
+            "index": 2,
+            "offset": 243,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 1,
+            "offset": 244,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "access": "dynamic",
+            "index": 5,
+            "method": {
+              "args": [
+                "char",
+                "int"
+              ],
+              "name": "makeConcatWithConstants",
+              "returns": {
+                "kind": "class",
+                "name": "java/lang/String"
+              }
+            },
+            "offset": 245,
+            "opr": "invoke"
+          },
+          {
+            "access": "special",
+            "method": {
+              "args": [
+                {
+                  "kind": "class",
+                  "name": "java/lang/Object"
+                }
+              ],
+              "is_interface": false,
+              "name": "<init>",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/AssertionError"
+              },
+              "returns": null
+            },
+            "offset": 250,
+            "opr": "invoke"
+          },
+          {
+            "offset": 253,
+            "opr": "throw"
+          },
+          {
+            "amount": 1,
+            "index": 1,
+            "offset": 254,
+            "opr": "incr"
+          },
+          {
+            "index": 1,
+            "offset": 257,
+            "opr": "load",
+            "type": "int"
+          },
+          {
+            "index": 0,
+            "offset": 258,
+            "opr": "load",
+            "type": "ref"
+          },
+          {
+            "access": "virtual",
+            "method": {
+              "args": [],
+              "name": "length",
+              "ref": {
+                "kind": "class",
+                "name": "java/lang/String"
+              },
+              "returns": "int"
+            },
+            "offset": 259,
+            "opr": "invoke"
+          },
+          {
+            "condition": "lt",
+            "offset": 262,
+            "opr": "if",
+            "target": 20
+          },
+          {
+            "offset": 265,
+            "opr": "return",
+            "type": null
+          }
+        ],
+        "exceptions": [],
+        "lines": [
+          {
+            "line": 75,
+            "offset": 0
+          },
+          {
+            "line": 76,
+            "offset": 2
+          },
+          {
+            "line": 77,
+            "offset": 8
+          },
+          {
+            "line": 78,
+            "offset": 11
+          },
+          {
+            "line": 80,
+            "offset": 17
+          },
+          {
+            "line": 81,
+            "offset": 20
+          },
+          {
+            "line": 82,
+            "offset": 24
+          },
+          {
+            "line": 83,
+            "offset": 27
+          },
+          {
+            "line": 84,
+            "offset": 42
+          },
+          {
+            "line": 85,
+            "offset": 43
+          },
+          {
+            "line": 87,
+            "offset": 44
+          },
+          {
+            "line": 89,
+            "offset": 52
+          },
+          {
+            "line": 90,
+            "offset": 55
+          },
+          {
+            "line": 91,
+            "offset": 56
+          },
+          {
+            "line": 92,
+            "offset": 59
+          },
+          {
+            "line": 93,
+            "offset": 74
+          },
+          {
+            "line": 94,
+            "offset": 75
+          },
+          {
+            "line": 96,
+            "offset": 76
+          },
+          {
+            "line": 98,
+            "offset": 84
+          },
+          {
+            "line": 99,
+            "offset": 87
+          },
+          {
+            "line": 100,
+            "offset": 102
+          },
+          {
+            "line": 101,
+            "offset": 103
+          },
+          {
+            "line": 103,
+            "offset": 104
+          },
+          {
+            "line": 106,
+            "offset": 112
+          },
+          {
+            "line": 80,
+            "offset": 121
+          },
+          {
+            "line": 109,
+            "offset": 126
+          }
+        ],
+        "max_locals": 3,
+        "max_stack": 4,
+        "stack_map": [
+          {
+            "index": 8,
+            "type": "same"
+          },
+          {
+            "index": 17,
+            "type": "same"
+          },
+          {
+            "index": 20,
+            "info": [
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "append_frame"
+          },
+          {
+            "index": 44,
+            "info": [
+              {
+                "type": "integer"
+              }
+            ],
+            "type": "append_frame"
+          },
+          {
+            "index": 52,
+            "type": "same"
+          },
+          {
+            "index": 56,
+            "type": "same"
+          },
+          {
+            "index": 76,
+            "type": "same"
+          },
+          {
+            "index": 84,
+            "type": "same"
+          },
+          {
+            "index": 104,
+            "type": "same"
+          },
+          {
+            "index": 112,
+            "type": "same"
+          },
+          {
+            "index": 121,
+            "info": 1,
+            "type": "chop_frame"
+          },
+          {
+            "index": 122,
+            "type": "same"
+          }
+        ]
+      },
+      "default": null,
+      "exceptions": [],
+      "name": "deepNesting",
+      "params": [
+        {
+          "annotations": [],
+          "type": {
+            "annotations": [],
+            "args": [],
+            "inner": null,
+            "kind": "class",
+            "name": "java/lang/String"
+          },
+          "visible": true
+        }
+      ],
+      "returns": {
+        "annotations": [],
+        "type": null
+      },
+      "typeparams": []
+    }
+  ],
+  "name": "jpamb/cases/Branch",
+  "super": {
+    "annotations": [],
+    "args": [],
+    "inner": null,
+    "name": "java/lang/Object"
+  },
+  "typeparams": [],
+  "version": [
+    63,
+    0
+  ]
+}

@@ -147,6 +147,8 @@ class Type(ABC):
                     return Int()
                 case "int":
                     return Int()
+                case "float":
+                    return Float()
                 case "char":
                     return Char()
                 case "short":
@@ -634,6 +636,8 @@ class Value:
             case String():
                 escaped = str(self.value).replace('\\', '\\\\').replace('"', '\\"')
                 return f'"{escaped}"'
+            case Float():
+                return str(self.value)
             case Array(content):
                 assert isinstance(self.value, Iterable)
                 match content:
@@ -664,6 +668,10 @@ class Value:
     @classmethod
     def string(cls, s: str) -> Self:
         return cls(String(), s)
+    
+    @classmethod
+    def float(cls, f: float) -> Self:
+        return cls(Float(), f)
 
     @classmethod
     def array(cls, type: Type, content: Iterable) -> Self:
@@ -706,6 +714,7 @@ class ValueParser:
             ("OPEN_ARRAY", r"\[[IC]:"),
             ("CLOSE_ARRAY", r"\]"),
             ("STRING", r'"(?:[^"\\]|\\.)*"'),
+            ("FLOAT", r"-?\d+\.\d+"),
             ("INT", r"-?\d+"),
             ("BOOL", r"true|false"),
             ("CHAR", r"'[^']'"),
@@ -758,6 +767,8 @@ class ValueParser:
                 return Value.boolean(self.parse_bool())
             case "STRING":
                 return Value.string(self.parse_string())
+            case "FLOAT":
+                return Value.float(self.parse_float())
             case "OPEN_ARRAY":
                 return self.parse_array()
         self.expected("char")
@@ -779,6 +790,10 @@ class ValueParser:
         s = tok.value[1:-1]
         s = s.replace('\\"', '"').replace('\\\\', '\\')
         return s
+    
+    def parse_float(self):
+        tok = self.expect("FLOAT")
+        return float(tok.value)
 
     def parse_array(self):
         key = self.expect("OPEN_ARRAY")
