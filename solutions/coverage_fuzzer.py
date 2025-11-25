@@ -74,22 +74,19 @@ def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) 
             return jvm.Value(jvm.Reference(), None)
 
 
-def mutate_input(s: str, rng: random.Random) -> str:
+def mutate_input(type: jvm.Type, rng: random.Random) -> jvm.Value:
+    match type:
+        case jvm.Value(jvm.Int(), int_type):
+            # Mutate integer by adding or subtracting a small random value
+            delta = rng.randint(-10, 10)
+            return jvm.Value.int(int_type + delta)
+        case jvm.Value(jvm.Boolean(), bool_type):
+            # Flip the boolean value
+            return jvm.Value.boolean(not bool_type)
+        case _:
+            # For unsupported types, return the original value
+            return jvm.Value(jvm.Reference(), None)
 
-    return s  # placeholder
-
-    s = list(s)
-
-    # pick random mutation count
-    for _ in range(rng.randint(1, 4)):
-        if not s:
-            break
-        pos = rng.randrange(len(s))
-
-        # flip char
-        s[pos] = chr(rng.randrange(32, 126))
-
-    return "".join(s)
 
 def fuzz_method(
     methodid: str,
@@ -98,6 +95,7 @@ def fuzz_method(
     save_file: str | None = None,
     max_str: int = 16,
     max_arr: int = 8,
+    mutation_rate: float = 0.8,
 ):
     rng = random.Random(seed)
 
@@ -106,7 +104,7 @@ def fuzz_method(
 
     # NEW: global coverage and corpus
     global_coverage: set[int] = set()
-    corpus: list[str] = []
+    corpus: list[jvm.Value] = []
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
@@ -115,9 +113,13 @@ def fuzz_method(
     for i in range(iterations):
 
         # --- choose between random generation and mutation ---
-        if corpus and rng.random() < 0.90:  # 90% mutations, 10% fresh
+        if corpus and rng.random() < mutation_rate:  # 90% mutations, 10% fresh
             parent_input = rng.choice(corpus)
-            in_str = mutate_input(parent_input, rng)  # you'll write this small helper
+            try:
+                input_value = mutate_input(parent_input, rng)  # you'll write this small helper
+            except Exception:
+                input_value = []
+            values = [input_value]
         else:
             # full random
             values = []
@@ -127,10 +129,9 @@ def fuzz_method(
                 except Exception:
                     input_value = jvm.Value(jvm.Reference(), None)
                 values.append(input_value)
-            in_str = _encode_values(values)
 
+        in_str = _encode_values(values)
         rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
-
         # NEW: compute coverage for this run
         run_coverage = set(trace)  # or edges: {(trace[i], trace[i+1]) ...}
 
@@ -138,7 +139,9 @@ def fuzz_method(
         new_edges = run_coverage - global_coverage
         if new_edges:
             global_coverage |= new_edges
-            corpus.append(in_str)     # save seed
+            for value in values:
+                if value not in corpus:
+                    corpus.append(value)
             print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
             
             if save_path is not None:
@@ -160,6 +163,7 @@ def main():
     parser.add_argument("--save-file", default=None, help="file to append interesting cases to")
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
+    parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
 
     args = parser.parse_args()
 
@@ -171,6 +175,7 @@ def main():
             save_file=args.save_file,
             max_str=args.max_str,
             max_arr=args.max_arr,
+            mutation_rate=args.mut_rate,
         )
         return
 
