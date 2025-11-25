@@ -114,6 +114,7 @@ def fuzz_method(
 
         # --- choose between random generation and mutation ---
         if corpus and rng.random() < mutation_rate:  # 90% mutations, 10% fresh
+            # mutation
             parent_input = rng.choice(corpus)
             try:
                 input_value = mutate_input(parent_input, rng)  # you'll write this small helper
@@ -132,10 +133,10 @@ def fuzz_method(
 
         in_str = _encode_values(values)
         rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
-        # NEW: compute coverage for this run
-        run_coverage = set(trace)  # or edges: {(trace[i], trace[i+1]) ...}
+        # compute coverage for this run
+        run_coverage = set(trace)
 
-        # NEW: detect coverage increase
+        # detect coverage increase
         new_edges = run_coverage - global_coverage
         if new_edges:
             global_coverage |= new_edges
