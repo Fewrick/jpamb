@@ -9,22 +9,6 @@ import jpamb
 from jpamb import jvm
 import re
 
-
-def string_to_array(arr_literal: str):
-    # Covert String to Array
-    s = arr_literal.strip()
-    if s.startswith("[") and s.endswith("]"):
-        s = s[1:-1]
-    parts = [p for p in re.split(r"[,\s]+", s) if p]
-    array = []
-    for p in parts:
-        try:
-            array.append(int(p))
-        except ValueError:
-            # ignore non-integer tokens
-            pass
-    return array
-
 def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
     """Run `solutions/interpreter.py` with the given method id and input string.
 
@@ -37,16 +21,17 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
     cmd = [sys.executable, str(interp_path), methodid, input_str]
 
     if capture_output:
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        interpreter_result = subprocess.run(cmd, capture_output=True, text=True)
 
-        lines = proc.stdout.strip().splitlines()
-        msg = lines[0] if len(lines) > 0 else ""
+        # Separate the first line (result) from the second line (trace)
+        lines = interpreter_result.stdout.strip().splitlines()
+        result = lines[0] if len(lines) > 0 else ""
         arr_literal = lines[1] if len(lines) > 1 else "[]"
 
-        trace = string_to_array(arr_literal)
-        print("trace: {trace}")
+        # Parse the trace array literal
+        trace = list(map(int, arr_literal.split(',')))
 
-        return proc.returncode, proc.stdout, proc.stderr
+        return interpreter_result.returncode, result, trace
     else:
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
@@ -89,6 +74,23 @@ def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) 
             return jvm.Value(jvm.Reference(), None)
 
 
+def mutate_input(s: str, rng: random.Random) -> str:
+
+    return s  # placeholder
+
+    s = list(s)
+
+    # pick random mutation count
+    for _ in range(rng.randint(1, 4)):
+        if not s:
+            break
+        pos = rng.randrange(len(s))
+
+        # flip char
+        s[pos] = chr(rng.randrange(32, 126))
+
+    return "".join(s)
+
 def fuzz_method(
     methodid: str,
     iterations: int = 1000,
@@ -102,35 +104,49 @@ def fuzz_method(
     abs_mid = jvm.AbsMethodID.decode(methodid)
     params = abs_mid.extension.params
 
-    seen = set()
-    saved = 0
-    save_path = Path(save_file) if save_file else None
+    # NEW: global coverage and corpus
+    global_coverage: set[int] = set()
+    corpus: list[str] = []
 
+    save_path = Path(save_file) if save_file else None
     if save_path is not None:
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
     for i in range(iterations):
-        values: list[jvm.Value] = []
-        for tt in params:
-            try:
-                v = _gen_for_type(tt, rng, max_str, max_arr)
-            except Exception:
-                v = jvm.Value(jvm.Reference(), None)
-            values.append(v)
 
-        in_str = _encode_values(values)
-        rc, out, err = run_interpreter(methodid, in_str, capture_output=True)
-        key = (out.strip(), err.strip())
-        if key not in seen:
-            seen.add(key)
-            saved += 1
-            summary = out.strip() or err.strip() or f"rc={rc}"
-            print(f"[+] new outcome #{len(seen)}: {summary}  input={in_str}")
+        # --- choose between random generation and mutation ---
+        if corpus and rng.random() < 0.90:  # 90% mutations, 10% fresh
+            parent_input = rng.choice(corpus)
+            in_str = mutate_input(parent_input, rng)  # you'll write this small helper
+        else:
+            # full random
+            values = []
+            for parameter_type in params:
+                try:
+                    input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
+                except Exception:
+                    input_value = jvm.Value(jvm.Reference(), None)
+                values.append(input_value)
+            in_str = _encode_values(values)
+
+        rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
+
+        # NEW: compute coverage for this run
+        run_coverage = set(trace)  # or edges: {(trace[i], trace[i+1]) ...}
+
+        # NEW: detect coverage increase
+        new_edges = run_coverage - global_coverage
+        if new_edges:
+            global_coverage |= new_edges
+            corpus.append(in_str)     # save seed
+            print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
+            
             if save_path is not None:
                 with open(save_path, "a", encoding="utf-8") as f:
-                    f.write(f"{methodid} {in_str} -> {summary}\n")
+                    f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
+        else:
+            print(f"[-] no new coverage  input={in_str}")
 
-    print(f"Fuzzing completed: {iterations} iterations, {len(seen)} unique outcomes, {saved} saved")
 
 
 def main():

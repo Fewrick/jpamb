@@ -521,11 +521,7 @@ def main():
         if isinstance(res, str):
             print(res)
             # Print trace in a readable format
-            print("[", end="")
-            for t in trace:
-                print(t, end=", ")
-            print("]")
-            
+            print(*trace, sep=",")
             break
     else:
         print("*")
