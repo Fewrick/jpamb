@@ -36,14 +36,21 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
 
-
+def _analyze_method(analysis: str) -> list[jvm.Value]:
+    match analysis:
+        case "sign":
+            print("⚠️  Sign analysis not implemented; continuing without seeding")
+            return [] 
+        case "syntactic":
+            print("⚠️  Syntactic analysis not implemented; continuing without seeding")
+            return []
 
 def _encode_values(values: list[jvm.Value]) -> str:
     return "(" + ", ".join(v.encode() for v in values) + ")"
 
 
-def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
-    match tt:
+def _gen_for_type(type: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
+    match type:
         case jvm.Int():
             return jvm.Value.int(rng.randint(-1000, 1000))
         case jvm.Boolean():
@@ -74,8 +81,8 @@ def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) 
             return jvm.Value(jvm.Reference(), None)
 
 
-def mutate_input(type: jvm.Type, rng: random.Random) -> jvm.Value:
-    match type:
+def _mutate_input(value: jvm.Value, rng: random.Random) -> jvm.Value:
+    match value:
         case jvm.Value(jvm.Int(), int_type):
             # Mutate integer by adding or subtracting a small random value
             delta = rng.randint(-10, 10)
@@ -96,15 +103,21 @@ def fuzz_method(
     max_str: int = 16,
     max_arr: int = 8,
     mutation_rate: float = 0.8,
+    analysis: str | None = None,
 ):
     rng = random.Random(seed)
 
     abs_mid = jvm.AbsMethodID.decode(methodid)
     params = abs_mid.extension.params
 
-    # NEW: global coverage and corpus
+    # global coverage and corpus
     global_coverage: set[int] = set()
     corpus: list[jvm.Value] = []
+
+    # get input from analyzer to seed corpus
+    if analysis:
+        print(f"[+] seeding corpus from analysis: {analysis}")
+        corpus = _analyze_method(analysis)  # you can change analysis type as needed
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
@@ -117,7 +130,7 @@ def fuzz_method(
             # mutation
             parent_input = rng.choice(corpus)
             try:
-                input_value = mutate_input(parent_input, rng)  # you'll write this small helper
+                input_value = _mutate_input(parent_input, rng)  # you'll write this small helper
             except Exception:
                 input_value = []
             values = [input_value]
@@ -165,6 +178,7 @@ def main():
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
     parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
+    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus")
 
     args = parser.parse_args()
 
@@ -177,19 +191,20 @@ def main():
             max_str=args.max_str,
             max_arr=args.max_arr,
             mutation_rate=args.mut_rate,
+            analysis=args.analysis,
         )
         return
 
     if not args.input:
         parser.error("either provide an input or use --fuzz")
 
-    rc, out, err = run_interpreter(args.methodid, args.input, capture_output=args.capture)
+    rc, result, trace = run_interpreter(args.methodid, args.input, capture_output=args.capture)
 
     if args.capture:
-        if out:
-            print(out, end="")
-        if err:
-            print(err, file=sys.stderr, end="")
+        if result:
+            print(result, end="")
+        if trace:
+            print(trace, file=sys.stderr, end="")
 
     sys.exit(rc)
 
