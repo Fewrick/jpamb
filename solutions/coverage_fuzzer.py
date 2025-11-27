@@ -55,6 +55,9 @@ def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.V
             return [] 
         case "syntactic":
             analysis = syntactic_analyzer.analyze(method_id).get("values", [])
+        case _:
+            print(f"⚠️  Unknown analysis type '{analyser}'; continuing without seeding")
+        
     # convert analysis results to jvm.Value based on type
     match type:
         case jvm.Int():
@@ -234,8 +237,6 @@ def fuzz_method(
         else:
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}")
 
-
-
 def main():
     parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input, or fuzz it.")
     parser.add_argument("methodid", help="method id to pass to interpreter (e.g. 'jpamb.cases.Simple.assertInteger:(I)V')")
@@ -248,7 +249,7 @@ def main():
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
     parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
-    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus")
+    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus, 'syntactic' or 'sign'")
 
     args = parser.parse_args()
 
