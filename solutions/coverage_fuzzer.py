@@ -50,8 +50,8 @@ def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.V
     analysis = []
     # perform analysis
     match analyser:
-        case "sign":
-            print("\033[91m⚠️   Sign analysis not implemented; continuing without seeding\033[0m")
+        case "abstract":
+            print("\033[91m⚠️   Abstract analysis not implemented; continuing without seeding\033[0m")
             return [] 
         case "syntactic":
             analysis = syntactic_analyzer.analyze(method_id).get("values", [])
@@ -256,7 +256,7 @@ def main():
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
     parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
-    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus, 'syntactic' or 'sign'")
+    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus, 'syntactic'")
 
     args = parser.parse_args()
 
