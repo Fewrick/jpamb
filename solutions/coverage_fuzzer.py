@@ -51,12 +51,12 @@ def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.V
     # perform analysis
     match analyser:
         case "sign":
-            print("⚠️  Sign analysis not implemented; continuing without seeding")
+            print("\033[91m⚠️   Sign analysis not implemented; continuing without seeding\033[0m")
             return [] 
         case "syntactic":
             analysis = syntactic_analyzer.analyze(method_id).get("values", [])
         case _:
-            print(f"⚠️  Unknown analysis type '{analyser}'; continuing without seeding")
+            print(f"\033[91m⚠️   Unknown analysis type '{analyser}'; continuing without seeding\033[0m")
         
     # convert analysis results to jvm.Value based on type
     match type:
@@ -69,7 +69,7 @@ def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.V
         case jvm.String():
             inputs = [jvm.Value.string(v) for v in analysis]
         case _:
-            print(f"⚠️  Analysis for type {type} not implemented; continuing without seeding")
+            print(f"\033[91m⚠️   Analysis for type {type} not implemented; continuing without seeding\033[0m")
     return inputs
     
 
@@ -180,12 +180,13 @@ def fuzz_method(
     global_coverage: set[int] = set()
     corpus: list[jvm.Value] = []
 
+    analysis_values: list[jvm.Value] = []
+
     # get input from analyzer to seed corpus
     if analysis:
-        print(f"    \033[94mseeding corpus from analysis: {analysis}")
-        corpus = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
-        analysis_values = [v.value for v in corpus]
-        print(f"    inputs from analysis: {analysis_values}\033[0m")
+        print(f"    \033[94mseeding corpus from {analysis} analysis\033[0m")
+        analysis_values = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
+        print(f"    \033[94minputs from analysis: {[v.value for v in analysis_values]}\033[0m")
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
@@ -193,8 +194,14 @@ def fuzz_method(
 
     for i in range(iterations):
 
+        # --- choose input generation strategy ---
+        if analysis_values:
+            # seed corpus with analysis values first
+            input_value = analysis_values.pop(0)
+            values = [input_value]
+
         # --- choose between random generation and mutation ---
-        if corpus and rng.random() < mutation_rate:  # 90% mutations, 10% fresh
+        elif corpus and rng.random() < mutation_rate:  # 90% mutations, 10% fresh
             # mutation
             parent_input = rng.choice(corpus)
             try:
@@ -225,10 +232,10 @@ def fuzz_method(
                 if value not in corpus:
                     corpus.append(value)
             print(f"\033[92m[+]\033[0m new coverage: +{len(new_edges)} edges  input={in_str}")
-            print(f"    \033[94mcoverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%\033[0m")
+            print(f"    coverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%")
     
             if len(global_coverage) >= len(all_offsets):
-                print(f"\033[92m    reached 100% coverage at {len(global_coverage)} edges, stopping fuzzing\033[0m")
+                print(f"\033[92m    reached 100% coverage, stopping fuzzing\033[0m")
                 break
             
             if save_path is not None:
