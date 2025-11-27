@@ -720,6 +720,7 @@ def main():
         if isinstance(res, str):
             print(res)
             # Print trace in a readable format
+            # COMMENT THE BELOW LINE OUT IF YOU WANT TO USE ONLY INTERPRETER WITHOUT COVERAGE FUZZER
             print(*trace, sep=",")
             break
     else:

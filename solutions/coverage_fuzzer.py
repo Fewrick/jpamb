@@ -8,12 +8,17 @@ import time
 from pathlib import Path
 
 import jpamb
-from jpamb import jvm
+from jpamb import jvm, model
 from syntactic_analyzer import analyze
 
 # Examples of how to run the interpreter from this script:
 # uv run solutions/coverage_fuzzer.py "jpamb.cases.Floats.floatGreaterThanThree:(F)V" --fuzz --iterations 10 --seed 1
 # uv run solutions/coverage_fuzzer.py "jpamb.cases.Loops.testEqual:(I)Ljava/lang/String;" --fuzz --iterations 5000 --seed 1 --no-seeds
+
+def get_all_offsets(methodid: str) -> set[int]:
+    suite = model.Suite(Path.cwd())
+    m = suite.findmethod(jvm.AbsMethodID.decode(methodid))
+    return set(range(len(m["code"]["bytecode"])))
 
 
 def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
@@ -90,7 +95,7 @@ def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) 
             return jvm.Value(jvm.Reference(), None)
         case _:
             # Unknown/unsupported type: produce a null reference
-            return type 
+            return jvm.Value(jvm.Reference(), None)
 
 
 def mutate_input(val: jvm.Value, rng: random.Random) -> jvm.Value:
@@ -118,6 +123,7 @@ def fuzz_method(
     rng = random.Random(seed)
     start = time.time()
     abs_mid = jvm.AbsMethodID.decode(methodid)
+    all_offsets = get_all_offsets(methodid)
     params = abs_mid.extension.params
     param_count = len(params)
 
@@ -183,9 +189,19 @@ def fuzz_method(
         new_edges = run_coverage - global_coverage
         if new_edges:
             global_coverage |= new_edges
+            
+            if global_coverage >= all_offsets:
+                full_time = time.time() - start
+                print(f"[FULL] {full_time:.3f}s  iters={i+1} coverage={len(global_coverage)}/{len(all_offsets)}")
+                iterations = i + 1
+                stuck = 0
+                last_new_time = time.time()
+                last_new_iter = i + 1  
+                break      
+
             stuck = 0
             last_new_time = time.time()
-            last_new_iter = i + 1        
+            last_new_iter = i + 1
             if i < len(seed_strs):
                 print(f"[+] new coverage: +{len(new_edges)} edges  seed={in_str}")
                 if save_path is not None:
@@ -204,12 +220,12 @@ def fuzz_method(
             print(f"[-] no new coverage  {tag}={in_str}")
 
             stuck += 1  
-            if stuck >= 25:  
+            if stuck >= 40:  
                 iterations = i + 1  
                 break
 
-    print(f"[FULL] {last_new_time - start:.3f}s  iters={last_new_iter} coverage={len(global_coverage)}")  # NEW
-    print(f"[TIME] {time.time() - start:.3f}s  total_iters={iterations}")  # optional
+    print(f"[FULL] {last_new_time - start:.3f}s  iters={last_new_iter} coverage={len(global_coverage)}/{len(all_offsets)}")
+    print(f"[TIME] {time.time() - start:.3f}s  total_iters={iterations}")
 
 
 
