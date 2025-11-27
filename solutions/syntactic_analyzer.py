@@ -40,21 +40,66 @@ def get_parameter_count(method_id: str) -> int:
     
     return count
 
+def get_parameter_types(method_id: str) -> list[str]:
+    """Extract parameter types from method signature."""
+    
+    if ":" not in method_id:
+        return []
+    
+    params_part = method_id.split(":")[1].split(")")[0]
+    if params_part == "(":
+        return []
+    
+    param_types = []
+    i = 1  # Skip opening '('
+    while i < len(params_part):
+        char = params_part[i]
+        if char in ['I', 'Z', 'F', 'D', 'J', 'S', 'B', 'C']:
+            param_types.append(char)
+            i += 1
+        elif char == 'L':  # Object type
+            start = i
+            while i < len(params_part) and params_part[i] != ';':
+                i += 1
+            param_types.append(params_part[start:i+1]) 
+            i += 1
+        elif char == '[':  # Array type
+            start = i
+            i += 1
+            if i < len(params_part) and params_part[i] == 'L':
+                while i < len(params_part) and params_part[i] != ';':
+                    i += 1
+                i += 1
+            else:
+                i += 1
+            param_types.append(params_part[start:i])
+        else:
+            i += 1
+    
+    return param_types
+
 def find_comparison_constants(bytecode):
-    """Find constants used in branches."""
     constants = []
-    
     for i, op in enumerate(bytecode):
-        if op.get("opr") not in ["ifz", "if"] or i < 1:
+        opr = op.get("opr")
+        if opr not in ["ifz", "if"] or i < 1:
             continue
-            
-        prev_op = bytecode[i - 1]
-        
-        if prev_op.get("opr") == "push":
-            value = prev_op.get("value", {})
-            if value.get("type") == "integer":
-                constants.append(value.get("value"))
-    
+
+        # check prev, and prev2 if needed
+        for k in (1, 2):
+            if i - k < 0: 
+                continue
+            prev_op = bytecode[i - k]
+            if prev_op.get("opr") == "push":
+                value = prev_op.get("value", {})
+                t = value.get("type")
+                if t in ("integer", "float"):
+                    constants.append(value.get("value"))
+                break  # stop after first push found
+
+        if opr == "ifz":
+            constants.append(0)
+
     return constants
 
 def find_parameter_comparisons(bytecode):
@@ -89,12 +134,34 @@ def find_string_constants(bytecode):
     
     return string_constants
 
-def generate_test_values(constants, string_constants, has_param_comparison, param_count):
+def generate_test_values(constants, string_constants, has_param_comparison, param_count, param_types):
     """Generate concrete test values for the fuzzer."""
     
     # Handle string constants
     if string_constants:
         return string_constants
+    
+    if param_types and all('String' in pt for pt in param_types) and not string_constants:
+        if not constants:
+            return []
+        small_cs = sorted({c for c in constants if isinstance(c, int) and 0 <= c <= 20})
+        if not small_cs:
+            return []
+        vals = []
+        for c in small_cs:
+            for L in [max(0, c-1), c, c+1]:
+                vals.append("a" * L)
+        return sorted(set(vals), key=len)
+    
+    # params are float/double, do float boundaries no matter how constants are typed
+    if any(pt in ("F", "D") for pt in param_types):
+        if not constants:
+            return []
+        nums = sorted(set(float(c) for c in constants))
+        out = []
+        for c in nums:
+            out.extend([c - 0.5, c, c + 0.5])
+        return sorted(set(out))
     
     # Handle parameter comparisons (2 parameters)
     if has_param_comparison:
@@ -110,21 +177,22 @@ def generate_test_values(constants, string_constants, has_param_comparison, para
     if constants:
         unique_constants = sorted(set(constants))
         
+        if any(isinstance(c, float) for c in unique_constants):
+            result = []
+            for c in unique_constants:
+                if isinstance(c, float):
+                    result.extend([c - 0.5, c, c + 0.5])
+            return sorted(set(result))
+
         # For methods with 3+ parameters, generate complete test cases
         if param_count >= 3:
             test_cases = []
             for c in unique_constants:
-                # Below boundary: avg < c
                 below_val = c - 2
                 test_cases.append([below_val] * param_count)
-                
-                # At boundary: avg = c
                 test_cases.append([c] * param_count)
-                
-                # Above boundary: avg > c
                 above_val = c + 2
                 test_cases.append([above_val] * param_count)
-            
             return test_cases
         
         # For single parameter methods
@@ -132,7 +200,6 @@ def generate_test_values(constants, string_constants, has_param_comparison, para
             c = unique_constants[0]
             return [c - 1, c, c + 1]
         else:
-            # Multiple constants - generate boundary values for each
             result = []
             for c in unique_constants:
                 result.extend([c - 1, c, c + 1])
@@ -146,11 +213,12 @@ def analyze(method_id: str) -> dict:
     bytecode = method["code"]["bytecode"]
     
     param_count = get_parameter_count(method_id)
+    param_types = get_parameter_types(method_id)
     constants = find_comparison_constants(bytecode)
     string_constants = find_string_constants(bytecode)
     has_param_comparison = find_parameter_comparisons(bytecode)
     
-    test_values = generate_test_values(constants, string_constants, has_param_comparison, param_count)
+    test_values = generate_test_values(constants, string_constants, has_param_comparison, param_count, param_types)
     
     return {
         "method": method_id,

@@ -3,6 +3,7 @@ import subprocess
 import sys
 import random
 import string
+import syntactic_analyzer
 from pathlib import Path
 
 import jpamb
@@ -36,14 +37,16 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
 
-def _analyze_method(analysis: str) -> list[jvm.Value]:
-    match analysis:
+def _analyze_method(analyser: str, method_id: str) -> list[jvm.Value]:
+    inputs: list[jvm.Value] = []
+    match analyser:
         case "sign":
             print("⚠️  Sign analysis not implemented; continuing without seeding")
             return [] 
         case "syntactic":
-            print("⚠️  Syntactic analysis not implemented; continuing without seeding")
-            return []
+            analysis = syntactic_analyzer.analyze(method_id).get("values", [])
+            inputs = [jvm.Value.int(v) for v in analysis]
+            return inputs
 
 def _encode_values(values: list[jvm.Value]) -> str:
     return "(" + ", ".join(v.encode() for v in values) + ")"
@@ -116,8 +119,10 @@ def fuzz_method(
 
     # get input from analyzer to seed corpus
     if analysis:
-        print(f"[+] seeding corpus from analysis: {analysis}")
-        corpus = _analyze_method(analysis)  # you can change analysis type as needed
+        print(f"    seeding corpus from analysis: {analysis}")
+        corpus = _analyze_method(analysis, methodid)
+        analysis_values = [v.value for v in corpus]
+        print(f"    inputs from analysis: {analysis_values}")
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
@@ -157,6 +162,12 @@ def fuzz_method(
                 if value not in corpus:
                     corpus.append(value)
             print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
+            # TODO: print coverage percentage
+            print(f"    total coverage: {len(global_coverage)} edges")
+            # TODO: Stop at 100% coverage
+            if len(global_coverage) > 1000:
+                print(f"[!] reached {len(global_coverage)} edges, stopping fuzzing")
+                break
             
             if save_path is not None:
                 with open(save_path, "a", encoding="utf-8") as f:
