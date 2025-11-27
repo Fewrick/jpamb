@@ -1,13 +1,20 @@
 import argparse
+import json
 import subprocess
 import sys
 import random
 import string
+import time 
 from pathlib import Path
 
 import jpamb
 from jpamb import jvm
-import re
+from syntactic_analyzer import analyze
+
+# Examples of how to run the interpreter from this script:
+# uv run solutions/coverage_fuzzer.py "jpamb.cases.Floats.floatGreaterThanThree:(F)V" --fuzz --iterations 10 --seed 1
+# uv run solutions/coverage_fuzzer.py "jpamb.cases.Loops.testEqual:(I)Ljava/lang/String;" --fuzz --iterations 5000 --seed 1 --no-seeds
+
 
 def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
     """Run `solutions/interpreter.py` with the given method id and input string.
@@ -27,9 +34,11 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         lines = interpreter_result.stdout.strip().splitlines()
         result = lines[0] if len(lines) > 0 else ""
         arr_literal = lines[1] if len(lines) > 1 else "[]"
-
-        # Parse the trace array literal
-        trace = list(map(int, arr_literal.split(',')))
+        arr_literal = arr_literal.strip()
+        if arr_literal in ("[]", ""):
+            trace = []
+        else:
+            trace = list(map(int, arr_literal.split(',')))
 
         return interpreter_result.returncode, result, trace
     else:
@@ -37,15 +46,22 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         return proc.returncode, "", ""
 
 
-
-def _encode_values(values: list[jvm.Value]) -> str:
-    return "(" + ", ".join(v.encode() for v in values) + ")"
+def _encode_values(values):
+    parts = []
+    for v in values:
+        try:
+            parts.append(v.encode())
+        except NotImplementedError:
+            parts.append("null")
+    return "(" + ", ".join(parts) + ")"
 
 
 def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
     match tt:
         case jvm.Int():
             return jvm.Value.int(rng.randint(-1000, 1000))
+        case jvm.Float(): 
+            return jvm.Value.float(rng.uniform(-100.0, 100.0))
         case jvm.Boolean():
             return jvm.Value.boolean(rng.choice([True, False]))
         case jvm.Char():
@@ -67,25 +83,26 @@ def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) 
         case jvm.Reference():
             return jvm.Value(jvm.Reference(), None)
         case jvm.Object() as obj:
-            # For object types other than String, produce a null reference
+            if "String" in str(obj):
+                length = rng.randint(0, max_str)
+                s = "".join(rng.choice(string.ascii_letters + string.digits + " _-") for _ in range(length))
+                return jvm.Value.string(s)
             return jvm.Value(jvm.Reference(), None)
         case _:
             # Unknown/unsupported type: produce a null reference
-            return jvm.Value(jvm.Reference(), None)
+            return type 
 
 
-def mutate_input(type: jvm.Type, rng: random.Random) -> jvm.Value:
-    match type:
-        case jvm.Value(jvm.Int(), int_type):
-            # Mutate integer by adding or subtracting a small random value
-            delta = rng.randint(-10, 10)
-            return jvm.Value.int(int_type + delta)
-        case jvm.Value(jvm.Boolean(), bool_type):
-            # Flip the boolean value
-            return jvm.Value.boolean(not bool_type)
+def mutate_input(val: jvm.Value, rng: random.Random) -> jvm.Value:
+    match val:
+        case jvm.Value(jvm.Int(), x):
+            return jvm.Value.int(x + rng.randint(-10, 10))
+        case jvm.Value(jvm.Float(), f):
+            return jvm.Value.float(f + rng.uniform(-50.0, 50.0))
+        case jvm.Value(jvm.Boolean(), b):
+            return jvm.Value.boolean(not b)
         case _:
-            # For unsupported types, return the original value
-            return jvm.Value(jvm.Reference(), None)
+            return val   
 
 
 def fuzz_method(
@@ -96,60 +113,105 @@ def fuzz_method(
     max_str: int = 16,
     max_arr: int = 8,
     mutation_rate: float = 0.8,
+    no_seeds: bool = False,
 ):
     rng = random.Random(seed)
-
+    start = time.time()
     abs_mid = jvm.AbsMethodID.decode(methodid)
     params = abs_mid.extension.params
+    param_count = len(params)
 
-    # NEW: global coverage and corpus
     global_coverage: set[int] = set()
     corpus: list[jvm.Value] = []
+
+    stuck = 0
+    last_new_time = start
+    last_new_iter = 0
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
+    # --- syntactic seeds ---
+    raw_seeds = analyze(methodid)["values"]
+    
+    seeds = [
+        s for s in raw_seeds
+        if (isinstance(s, list) and len(s) == param_count)
+        or (param_count == 1 and not isinstance(s, list))
+    ]
+
+    def seed_to_str(s):
+        if isinstance(s, list):
+            return "(" + ", ".join(map(str, s)) + ")"
+        return "(" + (json.dumps(s) if isinstance(s, str) else str(s)) + ")"
+
+    seed_strs = [] if no_seeds else [seed_to_str(s) for s in seeds]
+
     for i in range(iterations):
 
-        # --- choose between random generation and mutation ---
-        if corpus and rng.random() < mutation_rate:  # 90% mutations, 10% fresh
-            # mutation
-            parent_input = rng.choice(corpus)
-            try:
-                input_value = mutate_input(parent_input, rng)  # you'll write this small helper
-            except Exception:
-                input_value = []
-            values = [input_value]
+        # --- run syntactic seeds first ---
+        if i < len(seed_strs):
+            in_str = seed_strs[i]
+            rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
+            run_coverage = set(trace)
+
         else:
-            # full random
-            values = []
-            for parameter_type in params:
+            # --- choose between random generation and mutation ---
+            if corpus and param_count == 1 and rng.random() < mutation_rate:
+                parent_input = rng.choice(corpus)
                 try:
-                    input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
+                    input_value = mutate_input(parent_input, rng)
                 except Exception:
                     input_value = jvm.Value(jvm.Reference(), None)
-                values.append(input_value)
+                values = [input_value]
+            else:
+                values = []
+                for parameter_type in params:
+                    try:
+                        input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
+                    except Exception:
+                        input_value = jvm.Value(jvm.Reference(), None)
+                    values.append(input_value)
 
-        in_str = _encode_values(values)
-        rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
-        # compute coverage for this run
-        run_coverage = set(trace)
+            in_str = _encode_values(values)
+            rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
+            run_coverage = set(trace)
 
-        # detect coverage increase
+        # --- coverage bookkeeping ---
+        print("result =", result, " trace =", trace)
         new_edges = run_coverage - global_coverage
         if new_edges:
             global_coverage |= new_edges
-            for value in values:
-                if value not in corpus:
-                    corpus.append(value)
-            print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
-            
-            if save_path is not None:
-                with open(save_path, "a", encoding="utf-8") as f:
-                    f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
+            stuck = 0
+            last_new_time = time.time()
+            last_new_iter = i + 1        
+            if i < len(seed_strs):
+                print(f"[+] new coverage: +{len(new_edges)} edges  seed={in_str}")
+                if save_path is not None:
+                    with open(save_path, "a", encoding="utf-8") as f:
+                        f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
+            else:
+                for value in values:
+                    if value not in corpus:
+                        corpus.append(value)
+                print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
+                if save_path is not None:
+                    with open(save_path, "a", encoding="utf-8") as f:
+                        f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
         else:
-            print(f"[-] no new coverage  input={in_str}")
+            tag = "seed" if i < len(seed_strs) else "input"
+            print(f"[-] no new coverage  {tag}={in_str}")
+
+            stuck += 1  
+            if stuck >= 25:  
+                iterations = i + 1  
+                break
+
+    print(f"[FULL] {last_new_time - start:.3f}s  iters={last_new_iter} coverage={len(global_coverage)}")  # NEW
+    print(f"[TIME] {time.time() - start:.3f}s  total_iters={iterations}")  # optional
+
+
 
 
 
@@ -165,6 +227,7 @@ def main():
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
     parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
+    parser.add_argument("--no-seeds", action="store_true", help="disable syntactic seeds")
 
     args = parser.parse_args()
 
@@ -177,6 +240,7 @@ def main():
             max_str=args.max_str,
             max_arr=args.max_arr,
             mutation_rate=args.mut_rate,
+            no_seeds = args.no_seeds,
         )
         return
 
