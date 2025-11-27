@@ -3,12 +3,20 @@ import subprocess
 import sys
 import random
 import string
-import syntactic_analyzer
 from pathlib import Path
 
 import jpamb
 from jpamb import jvm
 import re
+
+from jpamb import jvm, model
+import syntactic_analyzer
+
+def get_all_offsets(methodid: str) -> set[int]:
+    suite = model.Suite(Path.cwd())
+    m = suite.findmethod(jvm.AbsMethodID.decode(methodid))
+    return set(range(len(m["code"]["bytecode"])))
+
 
 def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
     """Run `solutions/interpreter.py` with the given method id and input string.
@@ -37,16 +45,30 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
 
-def _analyze_method(analyser: str, method_id: str) -> list[jvm.Value]:
+def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.Value]:
     inputs: list[jvm.Value] = []
+    analysis = []
+    # perform analysis
     match analyser:
         case "sign":
             print("⚠️  Sign analysis not implemented; continuing without seeding")
             return [] 
         case "syntactic":
             analysis = syntactic_analyzer.analyze(method_id).get("values", [])
+    # convert analysis results to jvm.Value based on type
+    match type:
+        case jvm.Int():
             inputs = [jvm.Value.int(v) for v in analysis]
-            return inputs
+        case jvm.Boolean():
+            inputs = [jvm.Value.boolean(v) for v in analysis]
+        case jvm.Char():
+            inputs = [jvm.Value.char(v) for v in analysis]
+        case jvm.String():
+            inputs = [jvm.Value.string(v) for v in analysis]
+        case _:
+            print(f"⚠️  Analysis for type {type} not implemented; continuing without seeding")
+    return inputs
+    
 
 def _encode_values(values: list[jvm.Value]) -> str:
     return "(" + ", ".join(v.encode() for v in values) + ")"
@@ -86,16 +108,51 @@ def _gen_for_type(type: jvm.Type, rng: random.Random, max_str: int, max_arr: int
 
 def _mutate_input(value: jvm.Value, rng: random.Random) -> jvm.Value:
     match value:
-        case jvm.Value(jvm.Int(), int_type):
+        case jvm.Value(jvm.Int(), int_val):
             # Mutate integer by adding or subtracting a small random value
             delta = rng.randint(-10, 10)
-            return jvm.Value.int(int_type + delta)
-        case jvm.Value(jvm.Boolean(), bool_type):
+            return jvm.Value.int(int_val + delta)
+        case jvm.Value(jvm.Float(), float_val):
+            # Mutate float by adding a small random delta
+            delta = rng.uniform(-1.0, 1.0)
+            return jvm.Value.float(float_val + delta)
+        case jvm.Value(jvm.Boolean(), bool_val):
             # Flip the boolean value
-            return jvm.Value.boolean(not bool_type)
+            return jvm.Value.boolean(not bool_val)
+        case jvm.Value(jvm.Char(), char_val):
+            # Mutate char by replacing with a random character
+            return jvm.Value.char(rng.choice(string.ascii_letters))
+        case jvm.Value(jvm.String(), str_val):
+            # Mutate string by adding/removing/replacing a character
+            mutation_type = rng.choice(["add", "remove", "replace"])
+            if mutation_type == "add" and len(str_val) < 100:
+                idx = rng.randint(0, len(str_val))
+                char = rng.choice(string.ascii_letters + string.digits)
+                new_str = str_val[:idx] + char + str_val[idx:]
+                return jvm.Value.string(new_str)
+            elif mutation_type == "remove" and len(str_val) > 0:
+                idx = rng.randint(0, len(str_val) - 1)
+                new_str = str_val[:idx] + str_val[idx+1:]
+                return jvm.Value.string(new_str)
+            elif mutation_type == "replace" and len(str_val) > 0:
+                idx = rng.randint(0, len(str_val) - 1)
+                char = rng.choice(string.ascii_letters + string.digits)
+                new_str = str_val[:idx] + char + str_val[idx+1:]
+                return jvm.Value.string(new_str)
+            else:
+                return value
+        case jvm.Value(jvm.Array(contains), arr_val):
+            # Mutate array by modifying an element or changing length
+            if arr_val and len(arr_val) > 0:
+                idx = rng.randint(0, len(arr_val) - 1)
+                mutated_elem = _mutate_input(arr_val[idx], rng)
+                new_arr = arr_val[:idx] + [mutated_elem] + arr_val[idx+1:]
+                return jvm.Value.array(contains, new_arr)
+            else:
+                return value
         case _:
             # For unsupported types, return the original value
-            return jvm.Value(jvm.Reference(), None)
+            return value
 
 
 def fuzz_method(
@@ -108,6 +165,9 @@ def fuzz_method(
     mutation_rate: float = 0.8,
     analysis: str | None = None,
 ):
+    
+    all_offsets = get_all_offsets(methodid)
+
     rng = random.Random(seed)
 
     abs_mid = jvm.AbsMethodID.decode(methodid)
@@ -119,10 +179,10 @@ def fuzz_method(
 
     # get input from analyzer to seed corpus
     if analysis:
-        print(f"    seeding corpus from analysis: {analysis}")
-        corpus = _analyze_method(analysis, methodid)
+        print(f"    \033[94mseeding corpus from analysis: {analysis}")
+        corpus = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
         analysis_values = [v.value for v in corpus]
-        print(f"    inputs from analysis: {analysis_values}")
+        print(f"    inputs from analysis: {analysis_values}\033[0m")
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
@@ -161,19 +221,18 @@ def fuzz_method(
             for value in values:
                 if value not in corpus:
                     corpus.append(value)
-            print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
-            # TODO: print coverage percentage
-            print(f"    total coverage: {len(global_coverage)} edges")
-            # TODO: Stop at 100% coverage
-            if len(global_coverage) > 1000:
-                print(f"[!] reached {len(global_coverage)} edges, stopping fuzzing")
+            print(f"\033[92m[+]\033[0m new coverage: +{len(new_edges)} edges  input={in_str}")
+            print(f"    \033[94mcoverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%\033[0m")
+    
+            if len(global_coverage) >= len(all_offsets):
+                print(f"\033[92m    reached 100% coverage at {len(global_coverage)} edges, stopping fuzzing\033[0m")
                 break
             
             if save_path is not None:
                 with open(save_path, "a", encoding="utf-8") as f:
                     f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
         else:
-            print(f"[-] no new coverage  input={in_str}")
+            print(f"\033[93m[-]\033[0m no new coverage  input={in_str}")
 
 
 
