@@ -161,7 +161,7 @@ class Arithmetic:
         if ("+" in s1.signs and "+" in s2.signs) or ("-" in s1.signs and "-" in s2.signs):
             result.add(True)
             result.add(False)
-        if ("+" in s1.signs and "-" in s2.signs) or ("-" in s1.signs and "+" in s2.signs):
+        if ("+" in s1.signs and "-" in s2.signs) or ("-" in s1.signs and "+" in s2.signs) or ("0" in s1.signs and ("+" in s2.signs or "-" in s2.signs)) or (("+" in s1.signs or "-" in s1.signs) and "0" in s2.signs):
             result.add(False)
         return result
     
@@ -272,7 +272,10 @@ def step(state : AState) -> Iterable[AState | str]:
     logger.debug(f"STEP {opr}\n{state}")
     match opr:
         case jvm.Push(value=v):
-            frame.stack.push(SignSet.abstract([v.value]))
+            if v.type == jvm.String():
+                frame.stack.push(v)
+            else:
+                frame.stack.push(SignSet.abstract([v.value]))
             frame.pc += 1
             yield state
 
@@ -280,6 +283,14 @@ def step(state : AState) -> Iterable[AState | str]:
             frame.stack.push(frame.locals[i])
             frame.pc += 1
             yield state
+        
+        case jvm.Load(type=jvm.Float(), index=i):
+            frame.stack.push(frame.locals[i])
+            frame.pc += 1
+            yield state
+
+        case jvm.Load(type=jvm.Reference(), index=i):
+            yield "String detected"
         
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Div): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
@@ -324,6 +335,9 @@ def step(state : AState) -> Iterable[AState | str]:
                 yield state
             else:
                 yield "ok"
+
+        case jvm.Return(type=jvm.Reference()):
+            yield "String detected"
             
         case jvm.Return(type=None):
             state.frames.pop()
@@ -385,6 +399,7 @@ def step(state : AState) -> Iterable[AState | str]:
         case jvm.If(condition=cond, target=val):
             currentPC = frame.pc
             v2, v1 = frame.stack.pop(), frame.stack.pop()
+            print(v2, v1)
             if cond == 'gt': # greater than
                 result = Arithmetic.greaterThan(v1, v2)
                 if True in result:
@@ -411,12 +426,36 @@ def step(state : AState) -> Iterable[AState | str]:
                     yield state
             if cond == 'eq': # not equal
                 result = Arithmetic.equal(v1, v2)
+                print(result)
                 if True in result:
                     frame.pc = PC(frame.pc.method, val)
                     yield state.copy()
                 if False in result:
                     frame.pc = currentPC + 1
                     yield state
+            if cond == 'lt': # less than
+                result = Arithmetic.lessThan(v1, v2)
+                if True in result:
+                    frame.pc = PC(frame.pc.method, val)
+                    yield state.copy()
+                if False in result:
+                    frame.pc = currentPC + 1
+                    yield state
+
+        case jvm.CompareFloating(type=typ, nan_value=nan_val):
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            result = SignSet(set())
+            # Compare the two float values
+            if Arithmetic.greaterThan(v1, v2).__contains__(True):
+                result.add("+")
+            if Arithmetic.lessThan(v1, v2).__contains__(True):
+                result.add("-")
+            if Arithmetic.equal(v1, v2).__contains__(True):
+                result.add("0")
+
+            frame.stack.push(result)
+            frame.pc += 1
+            yield state
 
         case jvm.Get(static=is_static, field=field):
             if "$assertionsDisabled" in str(field):
@@ -464,6 +503,30 @@ def step(state : AState) -> Iterable[AState | str]:
                 # Handle other special methods
                 frame.pc += 1
                 yield state
+
+        case jvm.InvokeStatic(method=mid):
+            logger.debug(f"InvokeStatic: classname={mid.classname.dotted()}, method={mid.extension.name}")
+
+            params = getattr(mid.extension, "params", None)
+            param_elems = getattr(params, "_elements", ()) if params is not None else ()
+            param_count = len(param_elems)
+
+            args = [frame.stack.pop() for _ in range(param_count)][::-1]
+
+            callee = Frame.from_method(mid)
+            for i, a in enumerate(args):
+                callee.locals[i] = a
+
+            state.frames.push(callee)
+            yield state
+
+        case jvm.NewArray():
+            size = frame.stack.pop()
+            if "0" in size or "-" in size:
+                yield "negative array size"
+            else:
+                yield "Array found"
+
             
         case jvm.Throw():
             yield "assertion error"
@@ -475,7 +538,7 @@ def step(state : AState) -> Iterable[AState | str]:
 from collections import deque
 from typing import Iterable, Union
 
-def run_all(initial: AState, max_steps: int = 10000) -> set[Union[AState, str]]:
+def run_all(initial: AState, max_steps: int = 1000) -> set[Union[AState, str]]:
     """Runs symbolic execution until all branches terminate or max_steps reached."""
     results = set()
     worklist = deque([initial])
@@ -515,6 +578,8 @@ for i, v in enumerate(input.values):
             v = SignSet.abstract({value})
         case jvm.Value(type=jvm.Boolean(), value = value):
             v = SignSet("true" if value else "false")
+        case jvm.Value(type=jvm.Float(), value = value):
+            v = SignSet.abstract({int(value)})
         case jvm.Value(type=jvm.String(), value = value):
             v = SignSet(set())
             if "-" in value:
