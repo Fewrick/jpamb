@@ -586,48 +586,47 @@ def run_all(initial: AState, max_steps: int = 1000) -> set[Union[AState, str]]:
 
 
 
-
 suite = jpamb.Suite()
 bc = Bytecode(suite, dict())
-
-methodid, input = jpamb.getcase()
-
-
-frame = Frame.from_method(methodid)
-
-for i, v in enumerate(input.values):
-    match v: 
-        case jvm.Value(type=jvm.Int(), value = value):
-            v = SignSet.abstract({value})
-        case jvm.Value(type=jvm.Boolean(), value = value):
-            v = SignSet("true" if value else "false")
-        case jvm.Value(type=jvm.Float(), value = value):
-            v = SignSet.abstract({int(value)})
-        case jvm.Value(type=jvm.String(), value = value):
-            v = SignSet(set())
-            if "-" in value:
-                v.signs.add("-")
-            if "+" in value:
-                v.signs.add("+")
-            if "0" in value:
-                v.signs.add("0")
-            print(v)
-
-        case _:
-            raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
-    print(f"Local {i} = {v}")
-    frame.locals[i] = v
+def run():
+    methodid, input = jpamb.getcase()
 
 
-initial_state = AState({}, Stack.empty().push(frame))
-results = run_all(initial_state)
+    frame = Frame.from_method(methodid)
+
+    for i, v in enumerate(input.values):
+        match v: 
+            case jvm.Value(type=jvm.Int(), value = value):
+                v = SignSet.abstract({value})
+            case jvm.Value(type=jvm.Boolean(), value = value):
+                v = SignSet("true" if value else "false")
+            case jvm.Value(type=jvm.Float(), value = value):
+                v = SignSet.abstract({int(value)})
+            case jvm.Value(type=jvm.String(), value = value):
+                v = SignSet(set())
+                if "-" in value:
+                    v.signs.add("-")
+                if "+" in value:
+                    v.signs.add("+")
+                if "0" in value:
+                    v.signs.add("0")
+                print(v)
+
+            case _:
+                raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
+        print(f"Local {i} = {v}")
+        frame.locals[i] = v
 
 
-for r in results:
-    print(r)
+    initial_state = AState({}, Stack.empty().push(frame))
+    results = run_all(initial_state)
 
 
+    for r in results:
+        print(r)
 
+
+run()
 
 
 # def many_step(state : dict[PC, AState | str]) -> dict[PC, AState | str]:
