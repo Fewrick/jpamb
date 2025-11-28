@@ -106,6 +106,37 @@ def mutate_input(val: jvm.Value, rng: random.Random) -> jvm.Value:
             return jvm.Value.float(f + rng.uniform(-50.0, 50.0))
         case jvm.Value(jvm.Boolean(), b):
             return jvm.Value.boolean(not b)
+        case jvm.Value(jvm.Char(), c):
+            new_c = chr((ord(c) + rng.randint(-5, 5) - ord('a')) % 26 + ord('a'))
+            return jvm.Value.char(new_c)
+        case jvm.Value(jvm.String(), str_val):
+            # Mutate string by adding/removing/replacing a character
+            mutation_type = rng.choice(["add", "remove", "replace"])
+            if mutation_type == "add" and len(str_val) < 100:
+                idx = rng.randint(0, len(str_val))
+                char = rng.choice(string.ascii_letters + string.digits)
+                new_str = str_val[:idx] + char + str_val[idx:]
+                return jvm.Value.string(new_str)
+            elif mutation_type == "remove" and len(str_val) > 0:
+                idx = rng.randint(0, len(str_val) - 1)
+                new_str = str_val[:idx] + str_val[idx+1:]
+                return jvm.Value.string(new_str)
+            elif mutation_type == "replace" and len(str_val) > 0:
+                idx = rng.randint(0, len(str_val) - 1)
+                char = rng.choice(string.ascii_letters + string.digits)
+                new_str = str_val[:idx] + char + str_val[idx+1:]
+                return jvm.Value.string(new_str)
+            else:
+                return val
+        case jvm.Value(jvm.Array(contains), arr_val):
+            # Mutate array by modifying an element or changing length
+            if arr_val and len(arr_val) > 0:
+                idx = rng.randint(0, len(arr_val) - 1)
+                mutated_elem = mutate_input(arr_val[idx], rng)
+                new_arr = arr_val[:idx] + [mutated_elem] + arr_val[idx+1:]
+                return jvm.Value.array(contains, new_arr)
+            else:
+                return val
         case _:
             return val   
 
@@ -188,16 +219,7 @@ def fuzz_method(
         print("result =", result, " trace =", trace)
         new_edges = run_coverage - global_coverage
         if new_edges:
-            global_coverage |= new_edges
-            
-            if global_coverage >= all_offsets:
-                full_time = time.time() - start
-                print(f"[FULL] {full_time:.3f}s  iters={i+1} coverage={len(global_coverage)}/{len(all_offsets)}")
-                iterations = i + 1
-                stuck = 0
-                last_new_time = time.time()
-                last_new_iter = i + 1  
-                break      
+            global_coverage |= new_edges  
 
             stuck = 0
             last_new_time = time.time()
@@ -215,6 +237,16 @@ def fuzz_method(
                 if save_path is not None:
                     with open(save_path, "a", encoding="utf-8") as f:
                         f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
+
+            if global_coverage >= all_offsets:
+                full_time = time.time() - start
+                print(f"[FULL] {full_time:.3f}s  iters={i+1} coverage={len(global_coverage)}/{len(all_offsets)}")
+                iterations = i + 1
+                stuck = 0
+                last_new_time = time.time()
+                last_new_iter = i + 1  
+                break    
+
         else:
             tag = "seed" if i < len(seed_strs) else "input"
             print(f"[-] no new coverage  {tag}={in_str}")
@@ -226,8 +258,6 @@ def fuzz_method(
 
     print(f"[FULL] {last_new_time - start:.3f}s  iters={last_new_iter} coverage={len(global_coverage)}/{len(all_offsets)}")
     print(f"[TIME] {time.time() - start:.3f}s  total_iters={iterations}")
-
-
 
 
 
