@@ -1,19 +1,17 @@
 import argparse
-import json
 import subprocess
 import sys
 import random
 import string
-import time 
+import time
 from pathlib import Path
 
 import jpamb
-from jpamb import jvm, model
-from syntactic_analyzer import analyze
+from jpamb import jvm
+import re
 
-# Examples of how to run the interpreter from this script:
-# uv run solutions/coverage_fuzzer.py "jpamb.cases.Floats.floatGreaterThanThree:(F)V" --fuzz --iterations 10 --seed 1
-# uv run solutions/coverage_fuzzer.py "jpamb.cases.Loops.testEqual:(I)Ljava/lang/String;" --fuzz --iterations 5000 --seed 1 --no-seeds
+from jpamb import jvm, model
+import syntactic_analyzer
 
 def get_all_offsets(methodid: str) -> set[int]:
     suite = model.Suite(Path.cwd())
@@ -39,34 +37,55 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         lines = interpreter_result.stdout.strip().splitlines()
         result = lines[0] if len(lines) > 0 else ""
         arr_literal = lines[1] if len(lines) > 1 else "[]"
-        arr_literal = arr_literal.strip()
-        if arr_literal in ("[]", ""):
-            trace = []
-        else:
-            trace = list(map(int, arr_literal.split(',')))
+
+        # Parse the trace array literal
+        trace = list(map(int, arr_literal.split(',')))
 
         return interpreter_result.returncode, result, trace
     else:
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
 
+def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.Value]:
+    inputs: list[jvm.Value] = []
+    analysis = []
+    # perform analysis
+    match analyser:
+        case "abstract":
+            print("\033[91m⚠️   Abstract analysis not implemented; continuing without seeding\033[0m")
+            return [] 
+        case "syntactic":
+            analysis = syntactic_analyzer.analyze(method_id).get("values", [])
+        case _:
+            print(f"\033[91m⚠️   Unknown analysis type '{analyser}'; continuing without seeding\033[0m")
+        
+    # convert analysis results to jvm.Value based on type
+    match type:
+        case jvm.Int():
+            inputs = [jvm.Value.int(v) for v in analysis]
+        case jvm.Float():
+            inputs = [jvm.Value.float(v) for v in analysis]
+        case jvm.Boolean():
+            inputs = [jvm.Value.boolean(v) for v in analysis]
+        case jvm.Char():
+            inputs = [jvm.Value.char(v) for v in analysis]
+        case jvm.String():
+            inputs = [jvm.Value.string(v) for v in analysis]
+        case _:
+            print(f"\033[91m⚠️   Analysis for type {type} not implemented; continuing without seeding\033[0m")
+    return inputs
+    
 
-def _encode_values(values):
-    parts = []
-    for v in values:
-        try:
-            parts.append(v.encode())
-        except NotImplementedError:
-            parts.append("null")
-    return "(" + ", ".join(parts) + ")"
+def _encode_values(values: list[jvm.Value]) -> str:
+    return "(" + ", ".join(v.encode() for v in values) + ")"
 
 
-def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
-    match tt:
+def _gen_for_type(type: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
+    match type:
         case jvm.Int():
             return jvm.Value.int(rng.randint(-1000, 1000))
-        case jvm.Float(): 
-            return jvm.Value.float(rng.uniform(-100.0, 100.0))
+        case jvm.Float():
+            return jvm.Value.float(rng.uniform(-1000.0, 1000.0))
         case jvm.Boolean():
             return jvm.Value.boolean(rng.choice([True, False]))
         case jvm.Char():
@@ -88,27 +107,29 @@ def _gen_for_type(tt: jvm.Type, rng: random.Random, max_str: int, max_arr: int) 
         case jvm.Reference():
             return jvm.Value(jvm.Reference(), None)
         case jvm.Object() as obj:
-            if "String" in str(obj):
-                length = rng.randint(0, max_str)
-                s = "".join(rng.choice(string.ascii_letters + string.digits + " _-") for _ in range(length))
-                return jvm.Value.string(s)
+            # For object types other than String, produce a null reference
             return jvm.Value(jvm.Reference(), None)
         case _:
             # Unknown/unsupported type: produce a null reference
             return jvm.Value(jvm.Reference(), None)
 
 
-def mutate_input(val: jvm.Value, rng: random.Random) -> jvm.Value:
-    match val:
-        case jvm.Value(jvm.Int(), x):
-            return jvm.Value.int(x + rng.randint(-10, 10))
-        case jvm.Value(jvm.Float(), f):
-            return jvm.Value.float(f + rng.uniform(-50.0, 50.0))
-        case jvm.Value(jvm.Boolean(), b):
-            return jvm.Value.boolean(not b)
-        case jvm.Value(jvm.Char(), c):
-            new_c = chr((ord(c) + rng.randint(-5, 5) - ord('a')) % 26 + ord('a'))
-            return jvm.Value.char(new_c)
+def _mutate_input(value: jvm.Value, rng: random.Random) -> jvm.Value:
+    match value:
+        case jvm.Value(jvm.Int(), int_val):
+            # Mutate integer by adding or subtracting a small random value
+            delta = rng.randint(-10, 10)
+            return jvm.Value.int(int_val + delta)
+        case jvm.Value(jvm.Float(), float_val):
+            # Mutate float by adding a small random delta
+            delta = rng.uniform(-1.0, 1.0)
+            return jvm.Value.float(float_val + delta)
+        case jvm.Value(jvm.Boolean(), bool_val):
+            # Flip the boolean value
+            return jvm.Value.boolean(not bool_val)
+        case jvm.Value(jvm.Char(), char_val):
+            # Mutate char by replacing with a random character
+            return jvm.Value.char(rng.choice(string.ascii_letters))
         case jvm.Value(jvm.String(), str_val):
             # Mutate string by adding/removing/replacing a character
             mutation_type = rng.choice(["add", "remove", "replace"])
@@ -127,18 +148,19 @@ def mutate_input(val: jvm.Value, rng: random.Random) -> jvm.Value:
                 new_str = str_val[:idx] + char + str_val[idx+1:]
                 return jvm.Value.string(new_str)
             else:
-                return val
+                return value
         case jvm.Value(jvm.Array(contains), arr_val):
             # Mutate array by modifying an element or changing length
             if arr_val and len(arr_val) > 0:
                 idx = rng.randint(0, len(arr_val) - 1)
-                mutated_elem = mutate_input(arr_val[idx], rng)
+                mutated_elem = _mutate_input(arr_val[idx], rng)
                 new_arr = arr_val[:idx] + [mutated_elem] + arr_val[idx+1:]
                 return jvm.Value.array(contains, new_arr)
             else:
-                return val
+                return value
         case _:
-            return val   
+            # For unsupported types, return the original value
+            return value
 
 
 def fuzz_method(
@@ -149,117 +171,89 @@ def fuzz_method(
     max_str: int = 16,
     max_arr: int = 8,
     mutation_rate: float = 0.8,
-    no_seeds: bool = False,
+    analysis: str | None = None,
 ):
-    rng = random.Random(seed)
-    start = time.time()
-    abs_mid = jvm.AbsMethodID.decode(methodid)
+    
     all_offsets = get_all_offsets(methodid)
-    params = abs_mid.extension.params
-    param_count = len(params)
 
+    rng = random.Random(seed)
+
+    abs_mid = jvm.AbsMethodID.decode(methodid)
+    params = abs_mid.extension.params
+
+    # global coverage and corpus
     global_coverage: set[int] = set()
     corpus: list[jvm.Value] = []
 
-    stuck = 0
-    last_new_time = start
-    last_new_iter = 0
+    analysis_values: list[jvm.Value] = []
+
+    start_time = time.time()
+
+    # get input from analyzer to seed corpus
+    if analysis:
+        print(f"    \033[94mseeding corpus from {analysis} analysis\033[0m")
+        analysis_values = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
+        print(f"    \033[94minputs from analysis: {[v.value for v in analysis_values]}\033[0m")
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # --- syntactic seeds ---
-    raw_seeds = analyze(methodid)["values"]
-    
-    seeds = [
-        s for s in raw_seeds
-        if (isinstance(s, list) and len(s) == param_count)
-        or (param_count == 1 and not isinstance(s, list))
-    ]
-
-    def seed_to_str(s):
-        if isinstance(s, list):
-            return "(" + ", ".join(map(str, s)) + ")"
-        return "(" + (json.dumps(s) if isinstance(s, str) else str(s)) + ")"
-
-    seed_strs = [] if no_seeds else [seed_to_str(s) for s in seeds]
-
     for i in range(iterations):
 
-        # --- run syntactic seeds first ---
-        if i < len(seed_strs):
-            in_str = seed_strs[i]
-            rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
-            run_coverage = set(trace)
+        # --- choose input generation strategy ---
+        if analysis_values:
+            # seed corpus with analysis values first
+            input_value = analysis_values.pop(0)
+            values = [input_value]
 
+        # --- choose between random generation and mutation ---
+        elif corpus and rng.random() < mutation_rate:  # 90% mutations, 10% fresh
+            # mutation
+            parent_input = rng.choice(corpus)
+            try:
+                input_value = _mutate_input(parent_input, rng)  # you'll write this small helper
+            except Exception:
+                input_value = []
+            values = [input_value]
         else:
-            # --- choose between random generation and mutation ---
-            if corpus and param_count == 1 and rng.random() < mutation_rate:
-                parent_input = rng.choice(corpus)
+            # full random
+            values = []
+            for parameter_type in params:
                 try:
-                    input_value = mutate_input(parent_input, rng)
+                    input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
                 except Exception:
                     input_value = jvm.Value(jvm.Reference(), None)
-                values = [input_value]
-            else:
-                values = []
-                for parameter_type in params:
-                    try:
-                        input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
-                    except Exception:
-                        input_value = jvm.Value(jvm.Reference(), None)
-                    values.append(input_value)
+                values.append(input_value)
 
-            in_str = _encode_values(values)
-            rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
-            run_coverage = set(trace)
+        in_str = _encode_values(values)
+        rc, result, trace = run_interpreter(methodid, in_str, capture_output=True)
+        # compute coverage for this run
+        run_coverage = set(trace)
 
-        # --- coverage bookkeeping ---
-        print("result =", result, " trace =", trace)
+        # detect coverage increase
         new_edges = run_coverage - global_coverage
         if new_edges:
-            global_coverage |= new_edges  
-
-            stuck = 0
-            last_new_time = time.time()
-            last_new_iter = i + 1
-            if i < len(seed_strs):
-                print(f"[+] new coverage: +{len(new_edges)} edges  seed={in_str}")
-                if save_path is not None:
-                    with open(save_path, "a", encoding="utf-8") as f:
-                        f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
-            else:
-                for value in values:
-                    if value not in corpus:
-                        corpus.append(value)
-                print(f"[+] new coverage: +{len(new_edges)} edges  input={in_str}")
-                if save_path is not None:
-                    with open(save_path, "a", encoding="utf-8") as f:
-                        f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
-
-            if global_coverage >= all_offsets:
-                full_time = time.time() - start
-                print(f"[FULL] {full_time:.3f}s  iters={i+1} coverage={len(global_coverage)}/{len(all_offsets)}")
-                iterations = i + 1
-                stuck = 0
-                last_new_time = time.time()
-                last_new_iter = i + 1  
-                break    
-
-        else:
-            tag = "seed" if i < len(seed_strs) else "input"
-            print(f"[-] no new coverage  {tag}={in_str}")
-
-            stuck += 1  
-            if stuck >= 40:  
-                iterations = i + 1  
+            global_coverage |= new_edges
+            for value in values:
+                if value not in corpus:
+                    corpus.append(value)
+            print(f"\033[92m[+]\033[0m new coverage: +{len(new_edges)} edges  input={in_str}\tresult={result}")
+            print(f"    coverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%")
+    
+            if len(global_coverage) >= len(all_offsets):
+                print("\033[94mAll edges covered! Ending fuzzing early.\033[0m")
                 break
-
-    print(f"[FULL] {last_new_time - start:.3f}s  iters={last_new_iter} coverage={len(global_coverage)}/{len(all_offsets)}")
-    print(f"[TIME] {time.time() - start:.3f}s  total_iters={iterations}")
-
-
+            
+            if save_path is not None:
+                with open(save_path, "a", encoding="utf-8") as f:
+                    f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
+        else:
+            print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
+    end_time = time.time()
+    elapsed = end_time - start_time
+    print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({len(global_coverage)/len(all_offsets)*100:.2f}%)\033[0m")
+    print(f"\033[94mElapsed time: {elapsed:.2f} seconds\033[0m")
 
 def main():
     parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input, or fuzz it.")
@@ -273,7 +267,7 @@ def main():
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
     parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
-    parser.add_argument("--no-seeds", action="store_true", help="disable syntactic seeds")
+    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus, 'syntactic'")
 
     args = parser.parse_args()
 
@@ -286,20 +280,20 @@ def main():
             max_str=args.max_str,
             max_arr=args.max_arr,
             mutation_rate=args.mut_rate,
-            no_seeds = args.no_seeds,
+            analysis=args.analysis,
         )
         return
 
     if not args.input:
         parser.error("either provide an input or use --fuzz")
 
-    rc, out, err = run_interpreter(args.methodid, args.input, capture_output=args.capture)
+    rc, result, trace = run_interpreter(args.methodid, args.input, capture_output=args.capture)
 
     if args.capture:
-        if out:
-            print(out, end="")
-        if err:
-            print(err, file=sys.stderr, end="")
+        if result:
+            print(result, end="")
+        if trace:
+            print(trace, file=sys.stderr, end="")
 
     sys.exit(rc)
 
