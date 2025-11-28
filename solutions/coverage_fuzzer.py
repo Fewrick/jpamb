@@ -251,9 +251,32 @@ def fuzz_method(
     print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({len(global_coverage)/len(all_offsets)*100:.2f}%)\033[0m")
     print(f"\033[94mElapsed time: {elapsed:.2f} seconds\033[0m")
 
+def get_all_cases_from_file() -> list[str]:
+    case_file = Path("target/stats/cases.txt")
+    if not case_file.exists():
+        # Fallback: try to find it relative to the script location if run from elsewhere
+        case_file = Path(__file__).parent.parent / "target/stats/cases.txt"
+
+    if not case_file.exists():
+        print(f"\033[93mWarning: Could not find cases file at {case_file}\033[0m")
+        return []
+    
+    method_ids = set()
+    try:
+        with open(case_file, "r") as f:
+            for line in f:
+                parts = line.strip().split()
+                if parts:
+                    method_ids.add(parts[0])
+    except Exception as e:
+        print(f"\033[91mError reading cases file: {e}\033[0m")
+        return []
+        
+    return sorted(list(method_ids))
+
 def main():
     parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input, or fuzz it.")
-    parser.add_argument("methodid", help="method id to pass to interpreter (e.g. 'jpamb.cases.Simple.assertInteger:(I)V')")
+    parser.add_argument("methodid", nargs="?", help="method id to pass to interpreter (e.g. 'jpamb.cases.Simple.assertInteger:(I)V')")
     parser.add_argument("input", nargs="?", help="input string to pass to interpreter (e.g. '(1)')")
     parser.add_argument("--no-capture", dest="capture", action="store_false", help="don't capture interpreter output; stream to console")
     parser.add_argument("--fuzz", dest="fuzz", action="store_true", help="run fuzzing mode (generate random inputs)")
@@ -266,6 +289,31 @@ def main():
     parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus, 'syntactic'")
 
     args = parser.parse_args()
+
+    if args.methodid is None:
+        print("No method ID provided. Fuzzing all cases found in target/stats/cases.txt...")
+        method_ids = get_all_cases_from_file()
+        
+        if not method_ids:
+            print("No cases found to fuzz.")
+            sys.exit(1)
+
+        for mid in method_ids:
+            print(f"\n\033[1m{'='*80}\nFuzzing {mid}\n{'='*80}\033[0m")
+            try:
+                fuzz_method(
+                    mid,
+                    iterations=args.iterations,
+                    seed=args.seed,
+                    save_file=args.save_file,
+                    max_str=args.max_str,
+                    max_arr=args.max_arr,
+                    mutation_rate=args.mut_rate,
+                    analysis=args.analysis,
+                )
+            except Exception as e:
+                print(f"\033[91mError fuzzing {mid}: {e}\033[0m")
+        return
 
     if args.fuzz:
         fuzz_method(
