@@ -269,7 +269,7 @@ def step(state : AState) -> Iterable[AState | str]:
     assert isinstance(state, AState), f"expected frame but got {state}"
     frame = state.frames.peek()
     opr = bc[frame.pc]
-    logger.debug(f"STEP {opr}\n{state}")
+    # logger.debug(f"STEP {opr}\n{state}")
     match opr:
         case jvm.Push(value=v):
             if v.type == jvm.String():
@@ -298,7 +298,7 @@ def step(state : AState) -> Iterable[AState | str]:
             if "divide by zero" in result:
                 yield "divide by zero"
                 result.signs.remove("divide by zero")
-            print(result)
+            # print(result)
             if result.signs.__len__() > 0:
                 frame.stack.push(result)
                 frame.pc += 1
@@ -408,7 +408,6 @@ def step(state : AState) -> Iterable[AState | str]:
         case jvm.If(condition=cond, target=val):
             currentPC = frame.pc
             v2, v1 = frame.stack.pop(), frame.stack.pop()
-            print(v2, v1)
             if cond == 'gt': # greater than
                 result = Arithmetic.greaterThan(v1, v2)
                 if True in result:
@@ -435,7 +434,6 @@ def step(state : AState) -> Iterable[AState | str]:
                     yield state
             if cond == 'eq': # not equal
                 result = Arithmetic.equal(v1, v2)
-                print(result)
                 if True in result:
                     frame.pc = PC(frame.pc.method, val)
                     yield state.copy()
@@ -528,7 +526,7 @@ def step(state : AState) -> Iterable[AState | str]:
                 yield state
 
         case jvm.InvokeStatic(method=mid):
-            logger.debug(f"InvokeStatic: classname={mid.classname.dotted()}, method={mid.extension.name}")
+            # logger.debug(f"InvokeStatic: classname={mid.classname.dotted()}, method={mid.extension.name}")
 
             params = getattr(mid.extension, "params", None)
             param_elems = getattr(params, "_elements", ()) if params is not None else ()
@@ -612,11 +610,11 @@ def run(method_id: str, input_str: str) -> None:
                     v.signs.add("+")
                 if "0" in value:
                     v.signs.add("0")
-                print(v)
+                # print(v)
 
             case _:
                 raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
-        print(f"Local {i} = {v}")
+        # print(f"Local {i} = {v}")
         frame.locals[i] = v
 
 
