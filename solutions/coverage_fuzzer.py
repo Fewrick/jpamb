@@ -56,20 +56,26 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
     
     # perform sign analysis
     if "sign" in analyser:
-        for n in (range(-1,2)):  # run once to get analysis
-            result = signInterpreter.run(method_id, f"({n})")  # dummy input to run analysis
-            if "assertion error" in result:
-                pass
-            else:
-                if n == -1:
-                    global min_value
-                    min_value = 0
-                
-                elif n == 1:
-                    global max_value
-                    max_value = 0
+        try:
+            for n in (range(-1,2)):  # -1, 0, 1
+                result = signInterpreter.run(method_id, f"({n})")
+                if "assertion error" in result or "divide by zero" in result:
+                    pass
+                else:
+                    if n == -1:
+                        global min_value
+                        min_value = 0
+                    
+                    elif n == 1:
+                        global max_value
+                        max_value = 0
 
-                analyses.append(n)
+                    analyses.append(n)
+        except Exception:
+            print(f"\033[91m⚠️   Sign analysis failed for method {method_id}; continuing without seeding\033[0m")
+            pass
+
+
     print(f"    \033[94msign analysis reduced range: [{min_value}, {max_value}]\033[0m")
 
     # perform syntactic analysis
@@ -240,7 +246,6 @@ def fuzz_method(
             for parameter_type in params:
                 try:
                     input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
-                    print(f"    \033[94mgenerated input for type {parameter_type}: {input_value.value}\033[0m")
                 except Exception:
                     input_value = jvm.Value(jvm.Reference(), None)
                 values.append(input_value)
