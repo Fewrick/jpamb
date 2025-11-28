@@ -168,7 +168,7 @@ def fuzz_method(
     max_arr: int = 8,
     mutation_rate: float = 0.8,
     analysis: str | None = None,
-):
+) -> dict:
     
     all_offsets = get_all_offsets(methodid)
 
@@ -248,8 +248,17 @@ def fuzz_method(
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
     end_time = time.time()
     elapsed = end_time - start_time
-    print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({len(global_coverage)/len(all_offsets)*100:.2f}%)\033[0m")
+    coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
+    print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({coverage_pct:.2f}%)\033[0m")
     print(f"\033[94mElapsed time: {elapsed:.2f} seconds\033[0m")
+
+    return {
+        "method": methodid,
+        "coverage": len(global_coverage),
+        "total": len(all_offsets),
+        "percent": coverage_pct,
+        "time": elapsed
+    }
 
 def get_all_cases_from_file() -> list[str]:
     case_file = Path("target/stats/cases.txt")
@@ -298,10 +307,13 @@ def main():
             print("No cases found to fuzz.")
             sys.exit(1)
 
+        results = []
+        total_start_time = time.time()
+
         for mid in method_ids:
             print(f"\n\033[1m{'='*80}\nFuzzing {mid}\n{'='*80}\033[0m")
             try:
-                fuzz_method(
+                stats = fuzz_method(
                     mid,
                     iterations=args.iterations,
                     seed=args.seed,
@@ -311,8 +323,50 @@ def main():
                     mutation_rate=args.mut_rate,
                     analysis=args.analysis,
                 )
+                results.append(stats)
             except Exception as e:
                 print(f"\033[91mError fuzzing {mid}: {e}\033[0m")
+                results.append({"method": mid, "error": str(e)})
+        
+        total_elapsed = time.time() - total_start_time
+        
+        print("\n" + "="*100)
+        print(f"{'Method ID':<60} | {'Cov %':<8} | {'Time (s)':<8}")
+        print("-" * 100)
+        
+        total_pct = 0
+        valid_count = 0
+        
+        # Variables for aggregate total coverage
+        total_covered_edges = 0
+        total_available_edges = 0
+        
+        for res in results:
+            mid_display = res['method']
+            if len(mid_display) > 58:
+                mid_display = mid_display[:55] + "..."
+            
+            if "error" in res:
+                print(f"{mid_display:<60} | {'ERR':<8} | {'-':<8}")
+            else:
+                print(f"{mid_display:<60} | {res['percent']:6.2f}% | {res['time']:6.2f}")
+                total_pct += res['percent']
+                valid_count += 1
+                
+                # Accumulate totals for global calculation
+                total_covered_edges += res['coverage']
+                total_available_edges += res['total']
+                
+        print("-" * 100)
+        avg_cov = total_pct / valid_count if valid_count > 0 else 0
+        
+        # Calculate total coverage across all valid cases
+        total_cov_pct = (total_covered_edges / total_available_edges * 100) if total_available_edges > 0 else 0.0
+        
+        print(f"Total Elapsed Time: {total_elapsed:.2f}s")
+        print(f"Average Coverage:   {avg_cov:.2f}%")
+        print(f"Total Coverage:     {total_cov_pct:.2f}% ({total_covered_edges}/{total_available_edges} edges)")
+        
         return
 
     if args.fuzz:
