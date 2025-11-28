@@ -71,9 +71,7 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
         try:
             for n in (range(-1,2)):  # -1, 0, 1
                 result = signInterpreter.run(method_id, f"({n})")
-                if "assertion error" in result or "divide by zero" in result:
-                    pass
-                else:
+                if result == {'ok'}:
                     if n == -1:
                         global min_value
                         min_value = 0
@@ -83,6 +81,7 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
                         max_value = 0
 
                     analyses.append(n)
+            analyses.append(0)
         except Exception:
             max_value = 1000
             min_value = 1000
@@ -238,7 +237,9 @@ def fuzz_method(
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
     for i in range(iterations):
-
+        global max_value, min_value
+        max_value = 1000
+        min_value = -1000
         # --- choose input generation strategy ---
         if analysis_values:
             # use analysis values first
