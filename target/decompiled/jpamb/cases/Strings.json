@@ -1388,7 +1388,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "() -> assertion error"
+                        "value": "(\"\") -> assertion error"
                       }
                     }
                   }
