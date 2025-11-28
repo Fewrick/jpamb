@@ -622,8 +622,7 @@ def run(method_id: str, input_str: str) -> None:
     results = run_all(initial_state)
 
 
-    for r in results:
-        print(r)
+    print(f"intput: {input_str} - {results}")
 
     return results
 
