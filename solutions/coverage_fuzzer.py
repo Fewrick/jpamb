@@ -195,7 +195,8 @@ def fuzz_method(
     rng = random.Random(seed)
 
     abs_mid = jvm.AbsMethodID.decode(methodid)
-    params = abs_mid.extension.params
+    params_type = abs_mid.extension.params
+    params = getattr(params_type, "_elements", []) if params_type else []
 
     # global coverage and corpus
     global_coverage: set[int] = set()
@@ -268,12 +269,44 @@ def fuzz_method(
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
     end_time = time.time()
     elapsed = end_time - start_time
-    print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({len(global_coverage)/len(all_offsets)*100:.2f}%)\033[0m")
+    coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
+    print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({coverage_pct:.2f}%)\033[0m")
     print(f"\033[94mElapsed time: {elapsed:.2f} seconds\033[0m")
+
+    return {
+        "method": methodid,
+        "coverage": len(global_coverage),
+        "total": len(all_offsets),
+        "percent": coverage_pct,
+        "time": elapsed
+    }
+
+def get_all_cases_from_file() -> list[str]:
+    case_file = Path("target/stats/cases.txt")
+    if not case_file.exists():
+        # Fallback: try to find it relative to the script location if run from elsewhere
+        case_file = Path(__file__).parent.parent / "target/stats/cases.txt"
+
+    if not case_file.exists():
+        print(f"\033[93mWarning: Could not find cases file at {case_file}\033[0m")
+        return []
+    
+    method_ids = set()
+    try:
+        with open(case_file, "r") as f:
+            for line in f:
+                parts = line.strip().split()
+                if parts:
+                    method_ids.add(parts[0])
+    except Exception as e:
+        print(f"\033[91mError reading cases file: {e}\033[0m")
+        return []
+        
+    return sorted(list(method_ids))
 
 def main():
     parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input, or fuzz it.")
-    parser.add_argument("methodid", help="method id to pass to interpreter (e.g. 'jpamb.cases.Simple.assertInteger:(I)V')")
+    parser.add_argument("methodid", nargs="?", help="method id to pass to interpreter (e.g. 'jpamb.cases.Simple.assertInteger:(I)V')")
     parser.add_argument("input", nargs="?", help="input string to pass to interpreter (e.g. '(1)')")
     parser.add_argument("--no-capture", dest="capture", action="store_false", help="don't capture interpreter output; stream to console")
     parser.add_argument("--fuzz", dest="fuzz", action="store_true", help="run fuzzing mode (generate random inputs)")
@@ -286,6 +319,76 @@ def main():
     parser.add_argument("--analysis", nargs="+", default=None, help="type of analysis to seed corpus (e.g. 'syntactic', 'sign')")
 
     args = parser.parse_args()
+
+    if args.methodid is None:
+        print("No method ID provided. Fuzzing all cases found in target/stats/cases.txt...")
+        method_ids = get_all_cases_from_file()
+        
+        if not method_ids:
+            print("No cases found to fuzz.")
+            sys.exit(1)
+
+        results = []
+        total_start_time = time.time()
+
+        for mid in method_ids:
+            print(f"\n\033[1m{'='*80}\nFuzzing {mid}\n{'='*80}\033[0m")
+            try:
+                stats = fuzz_method(
+                    mid,
+                    iterations=args.iterations,
+                    seed=args.seed,
+                    save_file=args.save_file,
+                    max_str=args.max_str,
+                    max_arr=args.max_arr,
+                    mutation_rate=args.mut_rate,
+                    analysis=args.analysis,
+                )
+                results.append(stats)
+            except Exception as e:
+                print(f"\033[91mError fuzzing {mid}: {e}\033[0m")
+                results.append({"method": mid, "error": str(e)})
+        
+        total_elapsed = time.time() - total_start_time
+        
+        print("\n" + "="*100)
+        print(f"{'Method ID':<60} | {'Cov %':<8} | {'Time (s)':<8}")
+        print("-" * 100)
+        
+        total_pct = 0
+        valid_count = 0
+        
+        # Variables for aggregate total coverage
+        total_covered_edges = 0
+        total_available_edges = 0
+        
+        for res in results:
+            mid_display = res['method']
+            if len(mid_display) > 58:
+                mid_display = mid_display[:55] + "..."
+            
+            if "error" in res:
+                print(f"{mid_display:<60} | {'ERR':<8} | {'-':<8}")
+            else:
+                print(f"{mid_display:<60} | {res['percent']:6.2f}% | {res['time']:6.2f}")
+                total_pct += res['percent']
+                valid_count += 1
+                
+                # Accumulate totals for global calculation
+                total_covered_edges += res['coverage']
+                total_available_edges += res['total']
+                
+        print("-" * 100)
+        avg_cov = total_pct / valid_count if valid_count > 0 else 0
+        
+        # Calculate total coverage across all valid cases
+        total_cov_pct = (total_covered_edges / total_available_edges * 100) if total_available_edges > 0 else 0.0
+        
+        print(f"Total Elapsed Time: {total_elapsed:.2f}s")
+        print(f"Average Coverage:   {avg_cov:.2f}%")
+        print(f"Total Coverage:     {total_cov_pct:.2f}% ({total_covered_edges}/{total_available_edges} edges)")
+        
+        return
 
     if args.fuzz:
         fuzz_method(
