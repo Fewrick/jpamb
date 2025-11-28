@@ -6,10 +6,6 @@ import string
 import time
 from pathlib import Path
 
-import jpamb
-from jpamb import jvm
-import re
-
 from jpamb import jvm, model
 import syntactic_analyzer
 
