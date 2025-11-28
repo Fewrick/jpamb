@@ -591,8 +591,6 @@ suite = jpamb.Suite()
 bc = Bytecode(suite, dict())
 def run(method_id: str, input_str: str) -> None:
 
-    #methodid, input = jpamb.getcase()
-
     methodid = parse_methodid(method_id)
     input = parse_input(input_str)
 
@@ -631,11 +629,13 @@ def run(method_id: str, input_str: str) -> None:
 
     return results
 
-def main():
-    run()
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    run(argv[1], argv[2])
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 
 
 # def many_step(state : dict[PC, AState | str]) -> dict[PC, AState | str]:

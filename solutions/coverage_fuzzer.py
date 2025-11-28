@@ -53,6 +53,8 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
     # perform analysis
     if not analyser:
         return inputs
+    
+    # perform sign analysis
     if "sign" in analyser:
         for n in (range(-1,2)):  # run once to get analysis
             result = signInterpreter.run(method_id, f"({n})")  # dummy input to run analysis
@@ -68,9 +70,9 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
                     max_value = 0
 
                 analyses.append(n)
-
     print(f"    \033[94msign analysis reduced range: [{min_value}, {max_value}]\033[0m")
 
+    # perform syntactic analysis
     if "syntactic" in analyser:
         analyses = syntactic_analyzer.analyze(method_id).get("values", [])
 
