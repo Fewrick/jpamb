@@ -37,10 +37,22 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         # Separate the first line (result) from the second line (trace)
         lines = interpreter_result.stdout.strip().splitlines()
         result = lines[0] if len(lines) > 0 else ""
-        arr_literal = lines[1] if len(lines) > 1 else "[]"
+        arr_literal = lines[1] if len(lines) > 1 else ""
 
-        # Parse the trace array literal
-        trace = list(map(int, arr_literal.split(',')))
+        print(f"Debug: interpreter returned arr_literal: {arr_literal}")
+
+        if result == "*":
+            global max_value, min_value
+            max_value = int(max_value / 2)
+            min_value = int(min_value / 2)
+
+        # Parse the trace line into a list of integers
+        if not arr_literal:
+            print(f"Debug: trace line from interpreter: {arr_literal}")
+            trace = []
+        else:
+            print("Debug: no trace line from interpreter")
+            trace = list(map(int, arr_literal.split(',')))
 
         return interpreter_result.returncode, result, trace
     else:
@@ -75,8 +87,7 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
             print(f"\033[91m⚠️   Sign analysis failed for method {method_id}; continuing without seeding\033[0m")
             pass
 
-
-    print(f"    \033[94msign analysis reduced range: [{min_value}, {max_value}]\033[0m")
+        print(f"    \033[94msign analysis reduced range: [{min_value}, {max_value}]\033[0m")
 
     # perform syntactic analysis
     if "syntactic" in analyser:
@@ -342,7 +353,7 @@ def main():
             print(f"\n\033[1m{'='*80}\nFuzzing {mid}\n{'='*80}\033[0m")
             try:
                 stats = fuzz_method(
-                    mid,
+                    methodid=mid,
                     iterations=args.iterations,
                     seed=args.seed,
                     save_file=args.save_file,

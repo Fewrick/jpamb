@@ -13,7 +13,7 @@ logger.add(sys.stderr, format="[{level}] {message}")
 
 methodid, input = jpamb.getcase()
 
-trace = []
+trace = set()
 
 # ┌ Case jpamb.cases.Simple.checkBeforeDivideByN2:(0) -> ok ------------------- This one is nor working anymore
 # uv run solutions/interpreter.py "jpamb.cases.Simple.checkBeforeDivideByN2:(I)I" "(0)"
@@ -109,7 +109,7 @@ def step(state: State) -> State | str:
     frame = state.frames.peek()
     opr = bc[frame.pc]
     
-    trace.append(str(frame.pc.offset))
+    trace.add(str(frame.pc.offset))
 
     logger.debug(f"STEP {opr}\n{state}")
     match opr:
