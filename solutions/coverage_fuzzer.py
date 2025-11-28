@@ -3,6 +3,7 @@ import subprocess
 import sys
 import random
 import string
+import time
 from pathlib import Path
 
 import jpamb
@@ -62,6 +63,8 @@ def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.V
     match type:
         case jvm.Int():
             inputs = [jvm.Value.int(v) for v in analysis]
+        case jvm.Float():
+            inputs = [jvm.Value.float(v) for v in analysis]
         case jvm.Boolean():
             inputs = [jvm.Value.boolean(v) for v in analysis]
         case jvm.Char():
@@ -81,6 +84,8 @@ def _gen_for_type(type: jvm.Type, rng: random.Random, max_str: int, max_arr: int
     match type:
         case jvm.Int():
             return jvm.Value.int(rng.randint(-1000, 1000))
+        case jvm.Float():
+            return jvm.Value.float(rng.uniform(-1000.0, 1000.0))
         case jvm.Boolean():
             return jvm.Value.boolean(rng.choice([True, False]))
         case jvm.Char():
@@ -182,6 +187,8 @@ def fuzz_method(
 
     analysis_values: list[jvm.Value] = []
 
+    start_time = time.time()
+
     # get input from analyzer to seed corpus
     if analysis:
         print(f"    \033[94mseeding corpus from {analysis} analysis\033[0m")
@@ -231,7 +238,7 @@ def fuzz_method(
             for value in values:
                 if value not in corpus:
                     corpus.append(value)
-            print(f"\033[92m[+]\033[0m new coverage: +{len(new_edges)} edges  input={in_str}")
+            print(f"\033[92m[+]\033[0m new coverage: +{len(new_edges)} edges  input={in_str}\tresult={result}")
             print(f"    coverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%")
     
             if len(global_coverage) >= len(all_offsets):
@@ -242,8 +249,11 @@ def fuzz_method(
                 with open(save_path, "a", encoding="utf-8") as f:
                     f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
         else:
-            print(f"\033[93m[-]\033[0m no new coverage  input={in_str}")
+            print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
+    end_time = time.time()
+    elapsed = end_time - start_time
     print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({len(global_coverage)/len(all_offsets)*100:.2f}%)\033[0m")
+    print(f"\033[94mElapsed time: {elapsed:.2f} seconds\033[0m")
 
 def main():
     parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input, or fuzz it.")
