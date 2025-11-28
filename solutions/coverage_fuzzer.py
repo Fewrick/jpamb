@@ -175,7 +175,8 @@ def fuzz_method(
     rng = random.Random(seed)
 
     abs_mid = jvm.AbsMethodID.decode(methodid)
-    params = abs_mid.extension.params
+    params_type = abs_mid.extension.params
+    params = getattr(params_type, "_elements", []) if params_type else []
 
     # global coverage and corpus
     global_coverage: set[int] = set()
@@ -187,9 +188,12 @@ def fuzz_method(
 
     # get input from analyzer to seed corpus
     if analysis:
-        print(f"    \033[94mseeding corpus from {analysis} analysis\033[0m")
-        analysis_values = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
-        print(f"    \033[94minputs from analysis: {[v.value for v in analysis_values]}\033[0m")
+        if params:
+            print(f"    \033[94mseeding corpus from {analysis} analysis\033[0m")
+            analysis_values = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
+            print(f"    \033[94minputs from analysis: {[v.value for v in analysis_values]}\033[0m")
+        else:
+            print(f"    \033[93mAnalysis requested but method {methodid} has no parameters; skipping seeding.\033[0m")
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
