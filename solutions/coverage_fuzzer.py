@@ -7,7 +7,12 @@ import time
 from pathlib import Path
 
 from jpamb import jvm, model
+import signInterpreter
 import syntactic_analyzer
+
+global min_value, max_value
+max_value = 1000
+min_value = -1000
 
 def get_all_offsets(methodid: str) -> set[int]:
     suite = model.Suite(Path.cwd())
@@ -42,31 +47,46 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         proc = subprocess.run(cmd)
         return proc.returncode, "", ""
 
-def _analyze_method(analyser: str, method_id: str, type: jvm.Type) -> list[jvm.Value]:
+def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list[jvm.Value]:
     inputs: list[jvm.Value] = []
-    analysis = []
+    analyses = []
     # perform analysis
-    match analyser:
-        case "abstract":
-            print("\033[91m⚠️   Abstract analysis not implemented; continuing without seeding\033[0m")
-            return [] 
-        case "syntactic":
-            analysis = syntactic_analyzer.analyze(method_id).get("values", [])
-        case _:
-            print(f"\033[91m⚠️   Unknown analysis type '{analyser}'; continuing without seeding\033[0m")
-        
+    if not analyser:
+        return inputs
+    if "sign" in analyser:
+        for n in (range(-1,2)):  # run once to get analysis
+            result = signInterpreter.run(method_id, f"({n})")  # dummy input to run analysis
+            if "assertion error" in result:
+                pass
+            else:
+                if n == -1:
+                    global min_value
+                    min_value = 0
+                
+                elif n == 1:
+                    global max_value
+                    max_value = 0
+
+                analyses.append(n)
+
+    print(f"    \033[94msign analysis reduced range: [{min_value}, {max_value}]\033[0m")
+
+    if "syntactic" in analyser:
+        analyses = syntactic_analyzer.analyze(method_id).get("values", [])
+
+    print(f"    \033[94minputs from analyses: {analyses}\033[0m")
     # convert analysis results to jvm.Value based on type
     match type:
         case jvm.Int():
-            inputs = [jvm.Value.int(v) for v in analysis]
+            inputs = [jvm.Value.int(v) for v in analyses]
         case jvm.Float():
-            inputs = [jvm.Value.float(v) for v in analysis]
+            inputs = [jvm.Value.float(v) for v in analyses]
         case jvm.Boolean():
-            inputs = [jvm.Value.boolean(v) for v in analysis]
+            inputs = [jvm.Value.boolean(v) for v in analyses]
         case jvm.Char():
-            inputs = [jvm.Value.char(v) for v in analysis]
+            inputs = [jvm.Value.char(v) for v in analyses]
         case jvm.String():
-            inputs = [jvm.Value.string(v) for v in analysis]
+            inputs = [jvm.Value.string(v) for v in analyses]
         case _:
             print(f"\033[91m⚠️   Analysis for type {type} not implemented; continuing without seeding\033[0m")
     return inputs
@@ -79,9 +99,9 @@ def _encode_values(values: list[jvm.Value]) -> str:
 def _gen_for_type(type: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
     match type:
         case jvm.Int():
-            return jvm.Value.int(rng.randint(-1000, 1000))
+            return jvm.Value.int(rng.randint(min_value, max_value))
         case jvm.Float():
-            return jvm.Value.float(rng.uniform(-1000.0, 1000.0))
+            return jvm.Value.float(rng.uniform(float(min_value), float(max_value)))
         case jvm.Boolean():
             return jvm.Value.boolean(rng.choice([True, False]))
         case jvm.Char():
@@ -167,7 +187,7 @@ def fuzz_method(
     max_str: int = 16,
     max_arr: int = 8,
     mutation_rate: float = 0.8,
-    analysis: str | None = None,
+    analysis: list[str] | None = None,
 ):
     
     all_offsets = get_all_offsets(methodid)
@@ -187,9 +207,8 @@ def fuzz_method(
 
     # get input from analyzer to seed corpus
     if analysis:
-        print(f"    \033[94mseeding corpus from {analysis} analysis\033[0m")
+        print(f"    \033[94mrunning analyses {analysis}\033[0m")
         analysis_values = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
-        print(f"    \033[94minputs from analysis: {[v.value for v in analysis_values]}\033[0m")
 
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
@@ -199,7 +218,7 @@ def fuzz_method(
 
         # --- choose input generation strategy ---
         if analysis_values:
-            # seed corpus with analysis values first
+            # use analysis values first
             input_value = analysis_values.pop(0)
             values = [input_value]
 
@@ -218,6 +237,7 @@ def fuzz_method(
             for parameter_type in params:
                 try:
                     input_value = _gen_for_type(parameter_type, rng, max_str, max_arr)
+                    print(f"    \033[94mgenerated input for type {parameter_type}: {input_value.value}\033[0m")
                 except Exception:
                     input_value = jvm.Value(jvm.Reference(), None)
                 values.append(input_value)
@@ -263,7 +283,7 @@ def main():
     parser.add_argument("--max-str", type=int, default=16, help="max string length for generated strings")
     parser.add_argument("--max-arr", type=int, default=8, help="max array length for generated arrays")
     parser.add_argument("--mut-rate", type=float, default=0.9, help="mutation rate for fuzzing")
-    parser.add_argument("--analysis", default=None, help="type of analysis to seed corpus, 'syntactic'")
+    parser.add_argument("--analysis", nargs="+", default=None, help="type of analysis to seed corpus (e.g. 'syntactic', 'sign')")
 
     args = parser.parse_args()
 

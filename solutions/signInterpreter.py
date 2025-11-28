@@ -560,6 +560,7 @@ def step(state : AState) -> Iterable[AState | str]:
 
 from collections import deque
 from typing import Iterable, Union
+from jpamb import parse_input, parse_methodid
 
 def run_all(initial: AState, max_steps: int = 1000) -> set[Union[AState, str]]:
     """Runs symbolic execution until all branches terminate or max_steps reached."""
@@ -588,9 +589,12 @@ def run_all(initial: AState, max_steps: int = 1000) -> set[Union[AState, str]]:
 
 suite = jpamb.Suite()
 bc = Bytecode(suite, dict())
-def run():
-    methodid, input = jpamb.getcase()
+def run(method_id: str, input_str: str) -> None:
 
+    #methodid, input = jpamb.getcase()
+
+    methodid = parse_methodid(method_id)
+    input = parse_input(input_str)
 
     frame = Frame.from_method(methodid)
 
@@ -625,8 +629,13 @@ def run():
     for r in results:
         print(r)
 
+    return results
 
-run()
+def main():
+    run()
+
+if __name__ == "__main__":
+    main()
 
 
 # def many_step(state : dict[PC, AState | str]) -> dict[PC, AState | str]:
