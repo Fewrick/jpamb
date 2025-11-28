@@ -84,6 +84,9 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
 
                     analyses.append(n)
         except Exception:
+            max_value = 1000
+            min_value = 1000
+            
             print(f"\033[91m⚠️   Sign analysis failed for method {method_id}; continuing without seeding\033[0m")
             pass
 

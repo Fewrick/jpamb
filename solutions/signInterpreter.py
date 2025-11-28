@@ -100,6 +100,18 @@ class Arithmetic:
             result.add("-")
         return SignSet(result)
     
+    def remainder(s1 : SignSet, s2 : SignSet) -> SignSet | str:
+        result = set()
+        if "0" in s2.signs:
+            result.add("divide by zero")
+        if "0" in s1.signs:
+            result.add("0")
+        if "+" in s1.signs:
+            result.add("+")
+        if "-" in s1.signs:
+            result.add("-")
+        return SignSet(result)
+    
     def negate(s : SignSet) -> SignSet:
         result = set()
         if "+" in s.signs:
@@ -321,6 +333,14 @@ def step(state : AState) -> Iterable[AState | str]:
         case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Mul): # Binary Division
             v2, v1 = frame.stack.pop(), frame.stack.pop()
             result = Arithmetic.multiply(v1, v2)
+            frame.stack.push(result)
+            frame.pc += 1
+            yield state
+        
+
+        case jvm.Binary(type=jvm.Int(), operant=jvm.BinaryOpr.Rem): # Binary Remainder
+            v2, v1 = frame.stack.pop(), frame.stack.pop()
+            result = Arithmetic.remainder(v1, v2)
             frame.stack.push(result)
             frame.pc += 1
             yield state
