@@ -337,7 +337,16 @@ def step(state : AState) -> Iterable[AState | str]:
                 yield "ok"
 
         case jvm.Return(type=jvm.Reference()):
-            yield "String detected"
+            v1 = frame.stack.pop()
+            state.frames.pop()
+            if state.frames:
+                frame = state.frames.peek()
+                frame.stack.push(v1)
+                frame.pc += 1
+                yield state
+            else:
+                if isinstance(v1.type, jvm.String):
+                    yield v1.value
             
         case jvm.Return(type=None):
             state.frames.pop()
@@ -441,6 +450,14 @@ def step(state : AState) -> Iterable[AState | str]:
                 if False in result:
                     frame.pc = currentPC + 1
                     yield state
+            if cond == 'le': # less than or equal
+                result = Arithmetic.lessEqual(v1, v2)
+                if True in result:
+                    frame.pc = PC(frame.pc.method, val)
+                    yield state.copy()
+                if False in result:
+                    frame.pc = currentPC + 1
+                    yield state
 
         case jvm.CompareFloating(type=typ, nan_value=nan_val):
             v2, v1 = frame.stack.pop(), frame.stack.pop()
@@ -489,6 +506,12 @@ def step(state : AState) -> Iterable[AState | str]:
         case jvm.Cast(from_=jvm.Int(), to_=jvm.Short()):
             frame.pc += 1
             yield state
+
+        case jvm.Incr(index=i, amount=c):
+            v = frame.locals[i]
+            frame.locals[i] = Arithmetic.add(v, c)
+            frame.pc += 1
+            return state
         
         case jvm.InvokeSpecial(method=mid):
             method_name = mid.extension.name
