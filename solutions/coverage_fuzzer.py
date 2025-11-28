@@ -235,7 +235,7 @@ def fuzz_method(
             print(f"    coverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%")
     
             if len(global_coverage) >= len(all_offsets):
-                print(f"\033[92m    reached 100% coverage, stopping fuzzing\033[0m")
+                print("\033[94mAll edges covered! Ending fuzzing early.\033[0m")
                 break
             
             if save_path is not None:
@@ -243,6 +243,7 @@ def fuzz_method(
                     f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
         else:
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}")
+    print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({len(global_coverage)/len(all_offsets)*100:.2f}%)\033[0m")
 
 def main():
     parser = argparse.ArgumentParser(description="Run the interpreter with a given method id and input, or fuzz it.")
