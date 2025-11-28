@@ -67,6 +67,8 @@ jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abc") -> ok
 jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abcd") -> ok
 jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("hello") -> ok
 jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("world") -> assertion error
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava/lang/String)V ("") -> assertion error
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava/lang/String)V ("ProgramAnalysis") -> ok
 jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          (5, true) -> pass
 jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          (5, false) -> fail
 jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          (15, false) -> pass
