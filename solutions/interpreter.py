@@ -109,7 +109,7 @@ def step(state: State) -> State | str:
     frame = state.frames.peek()
     opr = bc[frame.pc]
     
-    trace.add(str(frame.pc.offset))
+    trace.add(str(frame.pc))
 
     logger.debug(f"STEP {opr}\n{state}")
     match opr:

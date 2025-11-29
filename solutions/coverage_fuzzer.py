@@ -14,13 +14,46 @@ global min_value, max_value
 max_value = 1000
 min_value = -1000
 
-def get_all_offsets(methodid: str) -> set[int]:
+def get_all_offsets(methodid: str) -> set[str]:
     suite = model.Suite(Path.cwd())
-    m = suite.findmethod(jvm.AbsMethodID.decode(methodid))
-    return set(range(len(m["code"]["bytecode"])))
+    
+    visited_methods = set()
+    entry_mid = jvm.AbsMethodID.decode(methodid)
+    worklist = [entry_mid]
+    offsets = set()
+
+    # Check if we should exclude the entry method (for Calls cases)
+    is_calls_case = "jpamb.cases.Calls" in methodid
+
+    while worklist:
+        mid = worklist.pop()
+        if mid in visited_methods:
+            continue
+        visited_methods.add(mid)
+
+        try:
+            # Get opcodes to find length and static calls
+            opcodes = list(suite.method_opcodes(mid))
+        except Exception:
+            continue
+
+        mid_str = str(mid)
+        
+        # Skip offsets for the entry method if it's a Calls case
+        skip_offsets = is_calls_case and mid == entry_mid
+
+        for i, op in enumerate(opcodes):
+            if not skip_offsets:
+                offsets.add(f"{mid_str}:{i}")
+            
+            if isinstance(op, jvm.InvokeStatic):
+                if op.method not in visited_methods:
+                    worklist.append(op.method)
+                    
+    return offsets
 
 
-def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, str]:
+def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) -> tuple[int, str, list[str]]:
     """Run `solutions/interpreter.py` with the given method id and input string.
 
     Returns a tuple of (returncode, stdout, stderr).
@@ -46,18 +79,22 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
             max_value = int(max_value / 2)
             min_value = int(min_value / 2)
 
-        # Parse the trace line into a list of integers
+        # Parse the trace line into a list of strings
         if not arr_literal:
-            print(f"Debug: trace line from interpreter: {arr_literal}")
+            print(f"Debug: no trace line from interpreter")
             trace = []
         else:
-            print("Debug: no trace line from interpreter")
-            trace = list(map(int, arr_literal.split(',')))
+            print(f"Debug: trace line from interpreter: {arr_literal}")
+            trace = arr_literal.split(',')
+
+        # Filter out entry method offsets for Calls cases to match get_all_offsets logic
+        if "jpamb.cases.Calls" in methodid:
+            trace = [t for t in trace if not t.startswith(methodid + ":")]
 
         return interpreter_result.returncode, result, trace
     else:
         proc = subprocess.run(cmd)
-        return proc.returncode, "", ""
+        return proc.returncode, "", []
 
 def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list[jvm.Value]:
     inputs: list[jvm.Value] = []
@@ -220,7 +257,7 @@ def fuzz_method(
     params = getattr(params_type, "_elements", []) if params_type else []
 
     # global coverage and corpus
-    global_coverage: set[int] = set()
+    global_coverage: set[str] = set()
     corpus: list[jvm.Value] = []
 
     analysis_values: list[jvm.Value] = []
