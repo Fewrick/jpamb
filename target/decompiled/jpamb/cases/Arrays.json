@@ -2316,7 +2316,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "([C: 'h','e','l','l','o']) -> ok"
+                        "value": "([C:'h','e','l','l','o']) -> ok"
                       }
                     }
                   }
@@ -2328,7 +2328,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "([C: 'x']) -> assertion error"
+                        "value": "([C:'x']) -> assertion error"
                       }
                     }
                   }
@@ -2340,7 +2340,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "([C: ]) -> out of bounds"
+                        "value": "([C:]) -> out of bounds"
                       }
                     }
                   }

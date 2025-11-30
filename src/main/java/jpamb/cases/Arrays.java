@@ -85,9 +85,9 @@ public class Arrays {
     assert array.length > 0;
   }
 
-  @Case("([C: 'h','e','l','l','o']) -> ok")
-  @Case("([C: 'x']) -> assertion error")
-  @Case("([C: ]) -> out of bounds")
+  @Case("([C:'h','e','l','l','o']) -> ok")
+  @Case("([C:'x']) -> assertion error")
+  @Case("([C:]) -> out of bounds")
   @Tag({ ARRAY })
   public static void arraySpellsHello(char[] array) {
     assert array[0] == 'h'

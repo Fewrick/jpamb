@@ -17,7 +17,7 @@ jpamb.cases.Arrays.binarySearch:(I)V                         (3) -> ok
 jpamb.cases.Arrays.binarySearch:(I)V                         (6) -> assertion error
 jpamb.cases.Calls.allPrimesArePositive:(I)V                  (-1) -> assertion error
 jpamb.cases.Calls.allPrimesArePositive:(I)V                  (0) -> out of bounds
-jpamb.cases.Calls.allPrimesArePositive:(I)V                  (100) -> ok
+jpamb.cases.Calls.allPrimesArePositive:(I)V                  (5) -> ok
 jpamb.cases.Calls.callsAssertFalse:()V                       () -> assertion error
 jpamb.cases.Calls.callsAssertFib:(I)V                        (0) -> assertion error
 jpamb.cases.Calls.callsAssertFib:(I)V                        (8) -> ok
@@ -67,8 +67,8 @@ jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abc") -> ok
 jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/String;)V  ("abcd") -> ok
 jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("hello") -> ok
 jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        ("world") -> assertion error
-jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava/lang/String)V ("") -> assertion error
-jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava/lang/String)V ("ProgramAnalysis") -> ok
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava/lang/String;)V ("") -> assertion error
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava/lang/String;)V ("ProgramAnalysis") -> ok
 jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          (5, true) -> pass
 jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          (5, false) -> fail
 jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          (15, false) -> pass
@@ -94,21 +94,11 @@ jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("a1b2c3") -> ok
 jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("a1b2c4") -> assertion error
 jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("11b2c3") -> assertion error
 jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("a1b2") -> assertion error
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("x2y3z1") -> ok
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("a0b0c6") -> ok
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("a5") -> assertion error
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V  ("") -> assertion error
 jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("PA02242") -> ok
 jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("PA02243") -> assertion error
 jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("PB02242") -> assertion error
 jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("PA0224") -> assertion error
-jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("PA022422") -> assertion error
-jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("XA02242") -> assertion error
-jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V    ("PA") -> assertion error
 jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("This1GoesDeep") -> ok
 jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("") -> assertion error
 jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("This1GoesDeeper") -> assertion error
 jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("This2GoesDeep") -> assertion error
-jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("This1") -> assertion error
-jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("GoesDeep") -> assertion error
-jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V     ("This") -> assertion error

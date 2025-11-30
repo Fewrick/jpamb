@@ -34,10 +34,8 @@ public class Branch {
             }
         }
 
-        if (sum == 6) {
-            if (!expectLetter) {
+        if (sum == 6 && expectLetter) {
                 return;
-            }
         }
         assert false : "invalid sum or incomplete sequence";
     }
@@ -66,10 +64,10 @@ public class Branch {
         }
     }
 
-    @Case("(This1GoesDeep) -> ok")
-    @Case("() -> assertion error")
-    @Case("(This1GoesDeeper) -> assertion error")
-    @Case("(This2GoesDeep) -> assertion error")
+    @Case("(\"This1GoesDeep\") -> ok")
+    @Case("(\"\") -> assertion error")
+    @Case("(\"This1GoesDeeper\") -> assertion error")
+    @Case("(\"This2GoesDeep\") -> assertion error")
     public static void deepNesting(String input) {
         // Expects "This1GoesDeep"
         if (input == null)

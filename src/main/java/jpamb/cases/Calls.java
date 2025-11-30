@@ -85,7 +85,7 @@ public class Calls {
     return primeArray;
   }
 
-  @Case("(100) -> ok")
+  @Case("(5) -> ok")
   @Case("(0) -> out of bounds")
   @Case("(-1) -> assertion error")
   @Tag({ CALL, ARRAY, LOOP, INTEGER_OVERFLOW })

@@ -5,6 +5,7 @@ import random
 import string
 import time
 from pathlib import Path
+import json
 
 from jpamb import jvm, model
 import signInterpreter
@@ -17,8 +18,27 @@ min_value = -1000
 def get_all_offsets(methodid: str) -> set[str]:
     suite = model.Suite(Path.cwd())
     
+    if '[C' in methodid:
+        class_name = methodid.split(':')[0].rsplit('.', 1)[0].replace('.', '/')
+        method_name = methodid.split(':')[0].rsplit('.', 1)[1]
+        class_file = Path.cwd() / "target" / "decompiled" / f"{class_name}.json"
+        
+        with open(class_file) as f:
+            class_data = json.load(f)
+        
+        for m in class_data['methods']:
+            if m['name'] == method_name:
+                # Count the bytecode instructions
+                offsets = set()
+                for i in range(len(m["code"]["bytecode"])):
+                    offsets.add(f"{methodid}:{i}")
+                return offsets
+        
+        # If method not found, return empty set
+        return set()
+
     visited_methods = set()
-    entry_mid = jvm.AbsMethodID.decode(methodid)
+    entry_mid = jvm.AbsMethodID.decode(methodid)  
     worklist = [entry_mid]
     offsets = set()
 
@@ -144,14 +164,47 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
         case jvm.Char():
             inputs = [jvm.Value.char(v) for v in analyses]
         case jvm.String():
-            inputs = [jvm.Value.string(v) for v in analyses]
+            inputs = []
+            for v in analyses:
+                if v == "null":
+                    inputs.append(jvm.Value(jvm.Reference(), None))
+                else:
+                    inputs.append(jvm.Value.string(v))
+        case jvm.Array(contains):
+            inputs = []
+            for v in analyses:
+                # Parse array literals like "[I: 1, 2, 3]" or "[C: 'h', 'e']"
+                if isinstance(v, str) and v.startswith("["):
+                    # Extract type and contents
+                    array_type = v[1]  # 'I' or 'C'
+                    content_str = v.split(": ", 1)[1].rstrip("]")
+                    
+                    if array_type == 'I':
+                        if content_str:
+                            content = [int(x.strip()) for x in content_str.split(",")]
+                        else:
+                            content = []
+                        inputs.append(jvm.Value.array(jvm.Int(), content))
+                    elif array_type == 'C':
+                        if content_str:
+                            # Parse "'h', 'e', 'l'" into ['h', 'e', 'l']
+                            chars = [c.strip().strip("'") for c in content_str.split(",")]
+                            inputs.append(jvm.Value.array(jvm.Char(), chars))
+                        else:
+                            inputs.append(jvm.Value.array(jvm.Char(), []))
         case _:
             print(f"\033[91m⚠️   Analysis for type {type} not implemented; continuing without seeding\033[0m")
     return inputs
     
 
 def _encode_values(values: list[jvm.Value]) -> str:
-    return "(" + ", ".join(v.encode() for v in values) + ")"
+    encoded = []
+    for v in values:
+        if isinstance(v.type, jvm.Reference) and v.value is None:
+            encoded.append("null")
+        else:
+            encoded.append(v.encode())
+    return "(" + ", ".join(encoded) + ")"
 
 
 def _gen_for_type(type: jvm.Type, rng: random.Random, max_str: int, max_arr: int) -> jvm.Value:
@@ -224,12 +277,23 @@ def _mutate_input(value: jvm.Value, rng: random.Random) -> jvm.Value:
             else:
                 return value
         case jvm.Value(jvm.Array(contains), arr_val):
-            # Mutate array by modifying an element or changing length
+    # Mutate array by modifying an element or changing length
             if arr_val and len(arr_val) > 0:
                 idx = rng.randint(0, len(arr_val) - 1)
-                mutated_elem = _mutate_input(arr_val[idx], rng)
-                new_arr = arr_val[:idx] + [mutated_elem] + arr_val[idx+1:]
-                return jvm.Value.array(contains, new_arr)
+                if isinstance(contains, jvm.Char):
+                    # For char arrays, mutate by changing a character
+                    new_char = rng.choice(string.ascii_letters)
+                    new_arr = list(arr_val)  # Make a copy
+                    new_arr[idx] = new_char
+                    return jvm.Value.array(contains, new_arr)
+                elif isinstance(contains, jvm.Int):
+                    # For int arrays, mutate by adding delta
+                    delta = rng.randint(-10, 10)
+                    new_arr = list(arr_val)
+                    new_arr[idx] = arr_val[idx] + delta
+                    return jvm.Value.array(contains, new_arr)
+                else:
+                    return value
             else:
                 return value
         case _:
@@ -315,7 +379,8 @@ def fuzz_method(
                 if value not in corpus:
                     corpus.append(value)
             print(f"\033[92m[+]\033[0m new coverage: +{len(new_edges)} edges  input={in_str}\tresult={result}")
-            print(f"    coverage precentage: {len(global_coverage)/len(all_offsets)*100:.2f}%")
+            coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
+            print(f"    coverage precentage: {coverage_pct:.2f}%")
     
             if len(global_coverage) >= len(all_offsets):
                 print("\033[94mAll edges covered! Ending fuzzing early.\033[0m")
@@ -325,6 +390,7 @@ def fuzz_method(
                 with open(save_path, "a", encoding="utf-8") as f:
                     f.write(f"{methodid} {in_str} -> new edges={new_edges}\n")
         else:
+            coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
     end_time = time.time()
     elapsed = end_time - start_time

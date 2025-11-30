@@ -421,12 +421,19 @@ def step(state: State) -> State | str:
                         return "null pointer"
                     string_obj = state.heap[string_ref.value]
                     string_value = string_obj.get("value", "")
-                    if other_ref.value in state.heap:
+                    
+                    if isinstance(other_ref.type, jvm.String) and not isinstance(other_ref.value, int):
+                        # It's a direct string value
+                        other_value = other_ref.value
+                        result = 1 if string_value == other_value else 0
+                    elif other_ref.value in state.heap:
+                        # It's a heap reference
                         other_obj = state.heap[other_ref.value]
                         other_value = other_obj.get("value", "")
                         result = 1 if string_value == other_value else 0
                     else:
                         result = 0
+                    
                     frame.stack.push(jvm.Value.int(result))
                     frame.pc += 1
                     return state
@@ -571,7 +578,7 @@ def step(state: State) -> State | str:
             return state
         
         case jvm.Store(type=jvm.Int(), index=i):
-            v = frame.stack.peek()
+            v = frame.stack.pop()
             frame.locals[i] = v
             frame.pc += 1
             return state
@@ -610,7 +617,8 @@ def step(state: State) -> State | str:
         case jvm.Cast(from_=jvm.Int(), to_=jvm.Short()): # This case is not complete but for now it works... :/
             v = frame.stack.pop()
             assert v.type is jvm.Int(), f"expected int, but got {v}"
-            # TODO: Handle casting
+            short_value = ((v.value + 32768) % 65536) - 32768
+            frame.stack.push(jvm.Value.int(short_value))
             frame.pc += 1
             return state
         
@@ -643,6 +651,9 @@ def step(state: State) -> State | str:
                 # Get the length of the string value
                 string_value = heap_obj.get("value", "")
                 length = len(string_value)
+            elif isinstance(heap_obj, dict) and heap_obj.get("class") == "Array":
+                # Use the 'elements' key for arrays stored as dicts
+                length = len(heap_obj.get("elements", []))
             else:
                 # It's an array
                 length = len(heap_obj)
@@ -655,11 +666,50 @@ def step(state: State) -> State | str:
         case jvm.ArrayLoad(type=jvm.Int()):
             index, array_ref = frame.stack.pop(), frame.stack.pop()
             logger.debug(f"Loading value at index {index} from array {array_ref}")
+            
+            if array_ref.value is None:
+                return "null pointer"
+            
+            heap_obj = state.heap[array_ref.value]
+            
+            # Handle both dict format and list format
+            if isinstance(heap_obj, dict) and heap_obj.get("class") == "Array":
+                elements = heap_obj.get("elements", [])
+            else:
+                elements = heap_obj
+            
+            if index.value < 0 or index.value >= len(elements):
+                return "out of bounds"
+            
             try:
-                value = state.heap[array_ref.value][index.value]
+                value = elements[index.value]
             except Exception as e:
                 return "assertion error"
+            
             frame.stack.push(jvm.Value.int(value))
+            frame.pc += 1
+            return state
+        
+        case jvm.ArrayLoad(type=jvm.Char()):
+            index, array_ref = frame.stack.pop(), frame.stack.pop()
+            logger.debug(f"Loading char at index {index} from array {array_ref}")
+            
+            if array_ref.value is None:
+                return "null pointer"
+            heap_obj = state.heap[array_ref.value]
+            
+            # Handle both dict format and list format
+            if isinstance(heap_obj, dict):
+                elements = heap_obj.get("elements", [])
+            else:
+                elements = heap_obj
+            
+            if index.value < 0 or index.value >= len(elements):
+                return "out of bounds"
+            
+            char_value = elements[index.value]
+            # Convert char to int (ASCII value)
+            frame.stack.push(jvm.Value.int(ord(char_value)))
             frame.pc += 1
             return state
         
@@ -695,25 +745,79 @@ def step(state: State) -> State | str:
 state = State({}, Stack.empty())
 
 frame = Frame.from_method(methodid)
-for i, v in enumerate(input.values):
+logger.debug(f"input.values = {input.values}")
+
+params = getattr(methodid.extension, "params", None)
+param_elems = getattr(params, "_elements", ()) if params is not None else ()
+param_count = len(param_elems)
+
+for i in range(param_count):
+    if i < len(input.values):
+        v = input.values[i]
+        match v: 
+            case jvm.Value(type=jvm.Int(), value = value):
+                v = v
+            case jvm.Value(type=jvm.Float(), value = value):
+                v = v
+            case jvm.Value(type=jvm.Boolean(), value = value):
+                logger.debug(f"converting boolean {value} to int")
+                v = jvm.Value.int(1 if value else 0)
+            case jvm.Value(type=jvm.String(), value = value):
+                string_ref = len(state.heap)
+                state.heap[string_ref] = {"class": "java.lang.String", "value": value}
+                v = jvm.Value(jvm.Reference(), string_ref)
+            case jvm.Value(type=jvm.Reference(), value=None):
+                v = jvm.Value(jvm.Reference(), None)
+            case jvm.Value(type=jvm.Array(contains=contains), value=value):
+                if v.value is None:
+                    frame.locals[i] = jvm.Value(jvm.Reference(), None)
+                else:
+                        # Allocate array in heap
+                        arr_ref = len(state.heap)  # CHANGE: use len(state.heap) instead of state.allocate()
+                        arr_contents = list(value)  # Convert tuple to list
+                        state.heap[arr_ref] = {
+                            "class": "Array",
+                            "type": contains,
+                            "length": len(arr_contents),
+                            "elements": arr_contents
+                        }
+                        v = jvm.Value(jvm.Reference(), arr_ref)
+            case _:
+                raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
+    else:
+        # No input provided for this parameter, default to null
+        v = jvm.Value(jvm.Reference(), None)
     
-    match v: 
-        case jvm.Value(type=jvm.Int(), value = value):
-            v = v
-        case jvm.Value(type=jvm.Float(), value = value):
-            v = v
-        case jvm.Value(type=jvm.Boolean(), value = value):
-            logger.debug(f"converting boolean {value} to int")
-            v = jvm.Value.int(1 if value else 0)
-        case jvm.Value(type=jvm.String(), value = value):
-            string_ref = len(state.heap)
-            state.heap[string_ref] = {"class": "java.lang.String", "value": value}
-            v = jvm.Value(jvm.Reference(), string_ref)
-        case _:
-            raise NotImplementedError(f"Don't know how to handle input value: {v!r}")
     frame.locals[i] = v
 
 def main():
+    try:
+        # This will cache the method in bc.methods
+        _ = bc[frame.pc]
+    except AssertionError:
+        if any(isinstance(p, jvm.Array) and isinstance(p.contains, jvm.Char) 
+               for p in getattr(methodid.extension.params, "_elements", [])):
+            # Load method directly from JSON
+            import json
+            from pathlib import Path
+            
+            class_name = str(methodid.classname).replace('.', '/')
+            method_name = methodid.extension.name
+            class_file = Path.cwd() / "target" / "decompiled" / f"{class_name}.json"
+            
+            with open(class_file) as f:
+                class_data = json.load(f)
+            
+            for m in class_data['methods']:
+                if m['name'] == method_name:
+                    # Convert JSON bytecode to opcodes
+                    opcodes = []
+                    for bc_json in m["code"]["bytecode"]:
+                        opcodes.append(jvm.Opcode.from_json(bc_json))
+                    bc.methods[methodid] = opcodes
+                    break
+        else:
+            raise
     state.frames.push(frame)
     for _ in range(1000):
         res = step(state)

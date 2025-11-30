@@ -94,8 +94,11 @@ def find_comparison_constants(bytecode):
                 value = prev_op.get("value", {})
                 t = value.get("type")
                 if t in ("integer", "float"):
-                    constants.append(value.get("value"))
-                break  # stop after first push found
+                    val = value.get("value")
+                    if t == "integer" and 32 <= val <= 126:
+                        constants.append(chr(val))
+                    constants.append(val)
+                break  
 
         if opr == "ifz":
             constants.append(0)
@@ -110,6 +113,18 @@ def find_parameter_comparisons(bytecode):
             prev2 = bytecode[i - 2]
             if prev1.get("opr") == "load" and prev2.get("opr") == "load":
                 return True
+    return False
+
+def detect_null_checks(bytecode):
+    """Detect if the method checks for null references."""
+    for i, op in enumerate(bytecode):
+        if op.get("opr") == "ifz" and i >= 1:
+            condition = op.get("condition")
+            if condition in ("is", "isnot"):
+                # Check if previous operation was loading a reference
+                prev_op = bytecode[i - 1]
+                if prev_op.get("opr") == "load" and prev_op.get("type") == "ref":
+                    return True
     return False
 
 def find_string_constants(bytecode):
@@ -133,11 +148,95 @@ def find_string_constants(bytecode):
                                     string_constants.append(string_val)
     
     return string_constants
+def detect_array_info(bytecode):
+    """Detect array patterns: max index, element values, and length requirements."""
+    max_index = -1
+    element_values = {}
+    length_req = None
+    
+    for i, op in enumerate(bytecode):
+        # Detect array[index] access
+        if op.get("opr") == "array_load" and i >= 1:
+            prev = bytecode[i - 1]
+            if prev.get("opr") == "push" and prev.get("value", {}).get("type") == "integer":
+                idx = prev["value"]["value"]
+                max_index = max(max_index, idx)
+                
+                # Check if followed by comparison (array[i] == value)
+                if i + 2 < len(bytecode):
+                    next_op = bytecode[i + 1]
+                    cmp_op = bytecode[i + 2]
+                    if next_op.get("opr") == "push" and cmp_op.get("opr") == "if":
+                        val = next_op["value"]["value"]
+                        element_values[idx] = chr(val) if 32 <= val <= 126 else val
+        
+        # Detect array.length checks
+        if op.get("opr") == "arraylength" and i + 1 < len(bytecode):
+            next_op = bytecode[i + 1]
+            if next_op.get("opr") == "ifz":
+                length_req = (0, next_op.get("condition", ""))
+            elif next_op.get("opr") == "push" and i + 2 < len(bytecode):
+                cmp_op = bytecode[i + 2]
+                if cmp_op.get("opr") == "if":
+                    length_req = (next_op["value"]["value"], cmp_op.get("condition", ""))
+    
+    return max_index, element_values, length_req
+
+def generate_array_values(param_type, max_index, element_values, length_req, constants=None):
+    """Generate array test values."""
+    results = []
+    
+    # Char array with specific elements
+    if '[C' in param_type and element_values:
+        chars = [f"'{element_values.get(i, '?')}'" for i in range(max(element_values.keys()) + 1)]
+        results.append(f"[C: {', '.join(chars)}]")
+        results.append("[C: ]")
+        return results
+    
+    # Int array with specific elements
+    if '[I' in param_type:
+        if element_values:
+            ints = [element_values.get(i, 0) for i in range(max(element_values.keys()) + 1)]
+            results.append(f"[I: {', '.join(map(str, ints))}]")
+        elif max_index >= 0:
+            results.append(f"[I: {', '.join(map(str, range(max_index + 1)))}]")
+        elif length_req and length_req[1] in ("gt", "ne"):
+            results.append(f"[I: 0]")  # Non-empty
+        elif constants:
+            int_constants = [c for c in constants if isinstance(c, int) and c > 10]
+            if int_constants:
+                target = max(int_constants)
+                val = (target // 2) + 1
+                results.append(f"[I: {val}, {val}, {val}]")
+        results.append("[I: ]")
+        return results
+    
+    return results
 
 def generate_test_values(constants, string_constants, has_param_comparison, param_count, param_types):
     """Generate concrete test values for the fuzzer."""
     
-    # Handle string constants
+    has_null_check = any(pt in ('Ljava/lang/String;', 'L') or '[' in pt for pt in param_types)
+    
+    if param_types and 'String' in str(param_types):
+        chars = [c for c in constants if isinstance(c, str) and len(c) == 1]
+        strings = string_constants if string_constants else []
+        
+        if chars and strings:
+            result = []
+            char_prefix = ''.join(chars)
+            for s in strings:
+                result.append(char_prefix + s)
+            if has_null_check:
+                result.append("null")
+            return result
+        elif chars:
+            result = string_constants.copy() if string_constants else []
+            combined = ''.join(chars)
+            if combined:
+                result.append(combined)
+            return result
+    
     if string_constants:
         return string_constants
     
@@ -209,21 +308,41 @@ def generate_test_values(constants, string_constants, has_param_comparison, para
 
 def analyze(method_id: str) -> dict:
     suite = model.Suite(Path.cwd())
-    method = suite.findmethod(jvm.AbsMethodID.decode(method_id))
-    bytecode = method["code"]["bytecode"]
     
+    # NEW: Workaround for char array parsing bug
+    try:
+        method = suite.findmethod(jvm.AbsMethodID.decode(method_id))
+    except AssertionError:
+        if '[C' in method_id:
+            import json
+            class_name = method_id.split(':')[0].rsplit('.', 1)[0].replace('.', '/')
+            method_name = method_id.split(':')[0].rsplit('.', 1)[1]
+            class_file = Path.cwd() / "target" / "decompiled" / f"{class_name}.json" 
+            with open(class_file) as f:
+                class_data = json.load(f)
+            for m in class_data['methods']:
+                if m['name'] == method_name:
+                    method = m
+                    break
+        else:
+            raise
+    
+    bytecode = method["code"]["bytecode"]
     param_count = get_parameter_count(method_id)
     param_types = get_parameter_types(method_id)
-    constants = find_comparison_constants(bytecode)
-    string_constants = find_string_constants(bytecode)
-    has_param_comparison = find_parameter_comparisons(bytecode)
     
-    test_values = generate_test_values(constants, string_constants, has_param_comparison, param_count, param_types)
+    max_index, element_values, length_req = detect_array_info(bytecode)
+    if any('[' in pt for pt in param_types):
+        constants = find_comparison_constants(bytecode)  # NEW: get constants for arrays too
+        test_values = generate_array_values(param_types[0], max_index, element_values, length_req, constants)  # NEW: pass constants
+    else:
+        constants = find_comparison_constants(bytecode)
+        string_constants = find_string_constants(bytecode)
+        has_param_comparison = find_parameter_comparisons(bytecode)
+        test_values = generate_test_values(constants, string_constants, has_param_comparison, 
+                                          param_count, param_types)
     
-    return {
-        "method": method_id,
-        "values": test_values
-    }
+    return {"method": method_id, "values": test_values}
 
 def main(argv: list[str]) -> int:
     if len(argv) == 2 and argv[1] == "info":

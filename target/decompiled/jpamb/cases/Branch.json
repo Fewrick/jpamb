@@ -1098,7 +1098,7 @@
             "type": "int"
           },
           {
-            "condition": "ne",
+            "condition": "eq",
             "offset": 142,
             "opr": "ifz",
             "target": 72
@@ -1248,18 +1248,14 @@
           },
           {
             "line": 38,
-            "offset": 69
-          },
-          {
-            "line": 39,
             "offset": 71
           },
           {
-            "line": 42,
+            "line": 40,
             "offset": 72
           },
           {
-            "line": 43,
+            "line": 41,
             "offset": 79
           }
         ],
@@ -1858,47 +1854,47 @@
         "exceptions": [],
         "lines": [
           {
-            "line": 51,
+            "line": 49,
             "offset": 0
           },
           {
-            "line": 52,
+            "line": 50,
             "offset": 2
           },
           {
-            "line": 53,
+            "line": 51,
             "offset": 8
           },
           {
-            "line": 54,
+            "line": 52,
             "offset": 12
           },
           {
-            "line": 55,
+            "line": 53,
             "offset": 22
           },
           {
-            "line": 56,
+            "line": 54,
             "offset": 26
           },
           {
-            "line": 57,
+            "line": 55,
             "offset": 30
           },
           {
-            "line": 59,
+            "line": 57,
             "offset": 31
           },
           {
-            "line": 62,
+            "line": 60,
             "offset": 38
           },
           {
-            "line": 65,
+            "line": 63,
             "offset": 45
           },
           {
-            "line": 67,
+            "line": 65,
             "offset": 52
           }
         ],
@@ -1979,7 +1975,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "(This1GoesDeep) -> ok"
+                        "value": "(\"This1GoesDeep\") -> ok"
                       }
                     }
                   }
@@ -1991,7 +1987,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "() -> assertion error"
+                        "value": "(\"\") -> assertion error"
                       }
                     }
                   }
@@ -2003,7 +1999,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "(This1GoesDeeper) -> assertion error"
+                        "value": "(\"This1GoesDeeper\") -> assertion error"
                       }
                     }
                   }
@@ -2015,7 +2011,7 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "(This2GoesDeep) -> assertion error"
+                        "value": "(\"This2GoesDeep\") -> assertion error"
                       }
                     }
                   }
@@ -3062,107 +3058,107 @@
         "exceptions": [],
         "lines": [
           {
-            "line": 75,
+            "line": 73,
             "offset": 0
           },
           {
-            "line": 76,
+            "line": 74,
             "offset": 2
           },
           {
-            "line": 77,
+            "line": 75,
             "offset": 8
           },
           {
-            "line": 78,
+            "line": 76,
             "offset": 11
           },
           {
-            "line": 80,
+            "line": 78,
             "offset": 17
           },
           {
-            "line": 81,
+            "line": 79,
             "offset": 20
           },
           {
-            "line": 82,
+            "line": 80,
             "offset": 24
           },
           {
-            "line": 83,
+            "line": 81,
             "offset": 27
           },
           {
-            "line": 84,
+            "line": 82,
             "offset": 42
           },
           {
-            "line": 85,
+            "line": 83,
             "offset": 43
           },
           {
-            "line": 87,
+            "line": 85,
             "offset": 44
           },
           {
-            "line": 89,
+            "line": 87,
             "offset": 52
           },
           {
-            "line": 90,
+            "line": 88,
             "offset": 55
           },
           {
-            "line": 91,
+            "line": 89,
             "offset": 56
           },
           {
-            "line": 92,
+            "line": 90,
             "offset": 59
           },
           {
-            "line": 93,
+            "line": 91,
             "offset": 74
           },
           {
-            "line": 94,
+            "line": 92,
             "offset": 75
           },
           {
-            "line": 96,
+            "line": 94,
             "offset": 76
           },
           {
-            "line": 98,
+            "line": 96,
             "offset": 84
           },
           {
-            "line": 99,
+            "line": 97,
             "offset": 87
           },
           {
-            "line": 100,
+            "line": 98,
             "offset": 102
           },
           {
-            "line": 101,
+            "line": 99,
             "offset": 103
           },
           {
-            "line": 103,
+            "line": 101,
             "offset": 104
           },
           {
-            "line": 106,
+            "line": 104,
             "offset": 112
           },
           {
-            "line": 80,
+            "line": 78,
             "offset": 121
           },
           {
-            "line": 109,
+            "line": 107,
             "offset": 126
           }
         ],

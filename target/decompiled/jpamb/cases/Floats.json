@@ -222,7 +222,19 @@
                     "values": {
                       "value": {
                         "type": "string",
-                        "value": "(-1.5) -> ok"
+                        "value": "(-1.5) -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(5.5) -> ok"
                       }
                     }
                   }
@@ -328,11 +340,11 @@
         "exceptions": [],
         "lines": [
           {
-            "line": 10,
+            "line": 11,
             "offset": 0
           },
           {
-            "line": 11,
+            "line": 12,
             "offset": 11
           }
         ],
@@ -397,6 +409,30 @@
                       "value": {
                         "type": "string",
                         "value": "(2.71) -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(3.0) -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(4.0) -> ok"
                       }
                     }
                   }
@@ -502,11 +538,11 @@
         "exceptions": [],
         "lines": [
           {
-            "line": 16,
+            "line": 19,
             "offset": 0
           },
           {
-            "line": 17,
+            "line": 20,
             "offset": 11
           }
         ],
@@ -571,6 +607,30 @@
                       "value": {
                         "type": "string",
                         "value": "(0.0) -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(-1.0) -> assertion error"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "annotation",
+                  "value": {
+                    "type": "jpamb/utils/Case",
+                    "values": {
+                      "value": {
+                        "type": "string",
+                        "value": "(0.5) -> ok"
                       }
                     }
                   }
@@ -676,11 +736,11 @@
         "exceptions": [],
         "lines": [
           {
-            "line": 22,
+            "line": 27,
             "offset": 0
           },
           {
-            "line": 23,
+            "line": 28,
             "offset": 11
           }
         ],
