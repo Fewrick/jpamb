@@ -124,7 +124,7 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
         return inputs
     
     # perform sign analysis
-    if "sign" in analyser:
+    if "sign" in analyser and isinstance(type, (jvm.Int, jvm.Float)):
         try:
             for n in (range(-1,2)):  # -1, 0, 1
                 result = signInterpreter.run(method_id, f"({n})")
@@ -337,6 +337,9 @@ def fuzz_method(
     save_path = Path(save_file) if save_file else None
     if save_path is not None:
         save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if not params:
+        iterations = 1  # no parameters, only one iteration needed
 
     for i in range(iterations):
         global max_value, min_value
