@@ -92,7 +92,7 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
         result = lines[0] if len(lines) > 0 else ""
         arr_literal = lines[1] if len(lines) > 1 else ""
 
-        print(f"Debug: interpreter returned arr_literal: {arr_literal}")
+        # print(f"Debug: interpreter returned arr_literal: {arr_literal}")
 
         if result == "*":
             global max_value, min_value
@@ -101,10 +101,10 @@ def run_interpreter(methodid: str, input_str: str, capture_output: bool = True) 
 
         # Parse the trace line into a list of strings
         if not arr_literal:
-            print(f"Debug: no trace line from interpreter")
+            # print(f"Debug: no trace line from interpreter")
             trace = []
         else:
-            print(f"Debug: trace line from interpreter: {arr_literal}")
+            # print(f"Debug: trace line from interpreter: {arr_literal}")
             trace = arr_literal.split(',')
 
         # Filter out entry method offsets for Calls cases to match get_all_offsets logic
@@ -142,6 +142,7 @@ def _analyze_method(analyser: list[str], method_id: str, type: jvm.Type) -> list
         except Exception:
             max_value = 1000
             min_value = 1000
+            analysis = []
             
             print(f"\033[91m⚠️   Sign analysis failed for method {method_id}; continuing without seeding\033[0m")
             pass
@@ -329,7 +330,7 @@ def fuzz_method(
     start_time = time.time()
 
     # get input from analyzer to seed corpus
-    if analysis:
+    if analysis and params:
         print(f"    \033[94mrunning analyses {analysis}\033[0m")
         analysis_values = _analyze_method(analysis, methodid, params[0])  # only analyze for first parameter type
 
