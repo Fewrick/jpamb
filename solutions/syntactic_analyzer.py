@@ -1,350 +1,334 @@
 import json
 import sys
 from pathlib import Path
-
 from jpamb import model, jvm
 
 def print_info():
     print("Syntactic Assertion Finder\n0.0.1\nGroup 17\nsyntactic,python\nno")
 
-def get_parameter_count(method_id: str) -> int:
-    """Extract parameter count from method signature."""
-    # Method ID format: "class.method:(params)return"
-    # Example: "jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;"
-    
+def parse_method_signature(method_id: str) -> tuple[int, list[str]]:
+    """Extract parameter count and types from method signature."""
     if ":" not in method_id:
-        return 0
+        return 0, []
     
-    params_part = method_id.split(":")[1].split(")")[0]
-    if params_part == "(":
-        return 0
-    
-    # Count parameter types
-    count = 0
-    i = 1  # Skip opening '('
-    while i < len(params_part):
-        char = params_part[i]
-        if char in ['I', 'Z', 'F', 'D', 'J', 'S', 'B', 'C']:  # Primitive types
-            count += 1
-            i += 1
-        elif char == 'L':  # Object type
-            count += 1
-            # Skip until ';'
-            while i < len(params_part) and params_part[i] != ';':
-                i += 1
-            i += 1
-        elif char == '[':  # Array type
-            i += 1
-        else:
-            i += 1
-    
-    return count
-
-def get_parameter_types(method_id: str) -> list[str]:
-    """Extract parameter types from method signature."""
-    
-    if ":" not in method_id:
-        return []
-    
-    params_part = method_id.split(":")[1].split(")")[0]
-    if params_part == "(":
-        return []
+    params_part = method_id.split(":")[1].split(")")[0][1:]
+    if not params_part:
+        return 0, []
     
     param_types = []
-    i = 1  # Skip opening '('
+    i = 0
     while i < len(params_part):
-        char = params_part[i]
-        if char in ['I', 'Z', 'F', 'D', 'J', 'S', 'B', 'C']:
-            param_types.append(char)
+        if params_part[i] in 'IZFDJSBC':
+            param_types.append(params_part[i])
             i += 1
-        elif char == 'L':  # Object type
-            start = i
-            while i < len(params_part) and params_part[i] != ';':
-                i += 1
-            param_types.append(params_part[start:i+1]) 
-            i += 1
-        elif char == '[':  # Array type
+        elif params_part[i] == 'L':
+            end = params_part.index(';', i) + 1
+            param_types.append(params_part[i:end])
+            i = end
+        elif params_part[i] == '[':
             start = i
             i += 1
             if i < len(params_part) and params_part[i] == 'L':
-                while i < len(params_part) and params_part[i] != ';':
-                    i += 1
-                i += 1
+                i = params_part.index(';', i) + 1
             else:
                 i += 1
             param_types.append(params_part[start:i])
         else:
             i += 1
     
-    return param_types
+    return len(param_types), param_types
 
-def find_comparison_constants(bytecode):
+def extract_constants(bytecode, param_count):
+    """Extract constants, strings, and detection flags from bytecode."""
     constants = []
+    string_constants = []
+    all_strings = []
+    has_param_comparison = False
+    has_null_check = False
+    string_transform = None
+    
+    # Collect all pushed strings
+    for op in bytecode:
+        if op.get("opr") == "push":
+            val = op.get("value")
+            if val and val.get("type") == "string":
+                s = val["value"]
+                if not any(kw in s.lower() for kw in ["must not", "does not match", "invalid", "error", "expected", "unexpected"]):
+                    all_strings.append(s)
+    
+    # Analyze operations
     for i, op in enumerate(bytecode):
         opr = op.get("opr")
-        if opr not in ["ifz", "if"] or i < 1:
-            continue
-
-        # check prev, and prev2 if needed
-        for k in (1, 2):
-            if i - k < 0: 
-                continue
-            prev_op = bytecode[i - k]
-            if prev_op.get("opr") == "push":
-                value = prev_op.get("value", {})
-                t = value.get("type")
-                if t in ("integer", "float"):
-                    val = value.get("value")
-                    if t == "integer" and 32 <= val <= 126:
-                        constants.append(chr(val))
-                    constants.append(val)
-                break  
-
-        if opr == "ifz":
-            constants.append(0)
-
-    return constants
-
-def find_parameter_comparisons(bytecode):
-    """Detect if parameters are compared to each other."""
-    for i, op in enumerate(bytecode):
-        if op.get("opr") == "if" and i >= 2:
-            prev1 = bytecode[i - 1]
-            prev2 = bytecode[i - 2]
-            if prev1.get("opr") == "load" and prev2.get("opr") == "load":
-                return True
-    return False
-
-def detect_null_checks(bytecode):
-    """Detect if the method checks for null references."""
-    for i, op in enumerate(bytecode):
-        if op.get("opr") == "ifz" and i >= 1:
-            condition = op.get("condition")
-            if condition in ("is", "isnot"):
-                # Check if previous operation was loading a reference
-                prev_op = bytecode[i - 1]
-                if prev_op.get("opr") == "load" and prev_op.get("type") == "ref":
-                    return True
-    return False
-
-def find_string_constants(bytecode):
-    """Find string constants used in equals() comparisons."""
-    string_constants = []
-    
-    for i, op in enumerate(bytecode):
-        if op.get("opr") == "invoke" and op.get("access") == "virtual":
-            method = op.get("method", {})
-            method_name = method.get("name", "")
+        
+        # Find comparison constants
+        if opr in ("ifz", "if"):
+            # Look back for pushed constants
+            for k in (1, 2):
+                if i >= k:
+                    prev = bytecode[i - k]
+                    if prev.get("opr") == "push":
+                        val_info = prev.get("value", {})
+                        if val_info.get("type") in ("integer", "float"):
+                            val = val_info["value"]
+                            constants.append(val)
+                            if val_info["type"] == "integer" and 32 <= val <= 126:
+                                constants.append(chr(val))
+                        break
             
-            if method_name == "equals":
-                for j in range(max(0, i - 3), i):
-                    prev_op = bytecode[j]
-                    if prev_op.get("opr") == "push":
-                        value = prev_op.get("value", {})
-                        if value.get("type") == "string":
-                            string_val = value.get("value")
-                            if "must not be null" not in string_val and "does not match" not in string_val:
-                                if string_val not in string_constants:
-                                    string_constants.append(string_val)
+            # ifz implies comparison with 0
+            if opr == "ifz":
+                constants.append(0)
+                # Detect null checks
+                if i >= 1 and op.get("condition") in ("is", "isnot"):
+                    if bytecode[i - 1].get("opr") == "load" and bytecode[i - 1].get("type") == "ref":
+                        has_null_check = True
+            
+            # Detect parameter comparisons
+            elif i >= 2:
+                prev1, prev2 = bytecode[i - 1], bytecode[i - 2]
+                if prev1.get("opr") == "load" and prev2.get("opr") == "load":
+                    idx1, idx2 = prev1.get("index", -1), prev2.get("index", -1)
+                    if idx1 != idx2 and 0 <= idx1 < param_count and 0 <= idx2 < param_count:
+                        has_param_comparison = True
+        
+        # Detect string transformations and equals() calls
+        elif opr == "invoke" and op.get("access") == "virtual":
+            method_name = op.get("method", {}).get("name", "")
+            
+            if method_name == "toUpperCase":
+                string_transform = "uppercase"
+            elif method_name == "toLowerCase":
+                string_transform = "lowercase"
+            elif method_name == "equals":
+                for j in range(max(0, i - 10), i):
+                    val = bytecode[j].get("value", {})
+                    if bytecode[j].get("opr") == "push" and val.get("type") == "string":
+                        s = val["value"]
+                        if s not in string_constants and not any(kw in s.lower() for kw in ["must not", "does not match", "invalid", "error", "expected", "unexpected"]):
+                            string_constants.append(s)
     
-    return string_constants
-def detect_array_info(bytecode):
-    """Detect array patterns: max index, element values, and length requirements."""
+    if string_transform and all_strings:
+        string_constants = all_strings
+    
+    return constants, string_constants, has_param_comparison, has_null_check, string_transform
+
+def extract_array_info(bytecode):
+    """Extract array access patterns."""
     max_index = -1
     element_values = {}
     length_req = None
     
     for i, op in enumerate(bytecode):
-        # Detect array[index] access
+        # Array element access
         if op.get("opr") == "array_load" and i >= 1:
             prev = bytecode[i - 1]
             if prev.get("opr") == "push" and prev.get("value", {}).get("type") == "integer":
                 idx = prev["value"]["value"]
                 max_index = max(max_index, idx)
                 
-                # Check if followed by comparison (array[i] == value)
+                # Check for element value comparison
                 if i + 2 < len(bytecode):
-                    next_op = bytecode[i + 1]
-                    cmp_op = bytecode[i + 2]
+                    next_op, cmp_op = bytecode[i + 1], bytecode[i + 2]
                     if next_op.get("opr") == "push" and cmp_op.get("opr") == "if":
                         val = next_op["value"]["value"]
                         element_values[idx] = chr(val) if 32 <= val <= 126 else val
         
-        # Detect array.length checks
+        # Array length checks
         if op.get("opr") == "arraylength" and i + 1 < len(bytecode):
             next_op = bytecode[i + 1]
             if next_op.get("opr") == "ifz":
                 length_req = (0, next_op.get("condition", ""))
             elif next_op.get("opr") == "push" and i + 2 < len(bytecode):
-                cmp_op = bytecode[i + 2]
-                if cmp_op.get("opr") == "if":
-                    length_req = (next_op["value"]["value"], cmp_op.get("condition", ""))
+                cmp = bytecode[i + 2]
+                if cmp.get("opr") == "if":
+                    length_req = (next_op["value"]["value"], cmp.get("condition", ""))
     
     return max_index, element_values, length_req
 
-def generate_array_values(param_type, max_index, element_values, length_req, constants=None):
-    """Generate array test values."""
-    results = []
+def has_parameter_usage(bytecode, param_count):
+    """Check if any parameters are actually used in the bytecode."""
+    if param_count == 0:
+        return False
     
-    # Char array with specific elements
-    if '[C' in param_type and element_values:
-        chars = [f"'{element_values.get(i, '?')}'" for i in range(max(element_values.keys()) + 1)]
-        results.append(f"[C: {', '.join(chars)}]")
-        results.append("[C: ]")
-        return results
+    for op in bytecode:
+        if op.get("opr") == "load" and 0 <= op.get("index", -1) < param_count:
+            return True
     
-    # Int array with specific elements
-    if '[I' in param_type:
-        if element_values:
-            ints = [element_values.get(i, 0) for i in range(max(element_values.keys()) + 1)]
-            results.append(f"[I: {', '.join(map(str, ints))}]")
-        elif max_index >= 0:
-            results.append(f"[I: {', '.join(map(str, range(max_index + 1)))}]")
-        elif length_req and length_req[1] in ("gt", "ne"):
-            results.append(f"[I: 0]")  # Non-empty
-        elif constants:
-            int_constants = [c for c in constants if isinstance(c, int) and c > 10]
-            if int_constants:
-                target = max(int_constants)
-                val = (target // 2) + 1
-                results.append(f"[I: {val}, {val}, {val}]")
-        results.append("[I: ]")
-        return results
-    
-    return results
+    return False
 
-def generate_test_values(constants, string_constants, has_param_comparison, param_count, param_types):
-    """Generate concrete test values for the fuzzer."""
+def generate_values(param_types, constants, string_constants, has_param_comparison, 
+                    string_transform=None, max_index=-1, element_values=None, 
+                    length_req=None, bytecode=None):
+    """Generate test values based on analysis."""
+    param_count = len(param_types)
+
+    # Handle booleans
+    if param_types and 'Z' in param_types[0]:
+        return [False, True]
     
-    has_null_check = any(pt in ('Ljava/lang/String;', 'L') or '[' in pt for pt in param_types)
+    # Handle arrays
+    if param_types and '[' in param_types[0]:
+        results = []
+        if '[C' in param_types[0] and element_values:
+            chars = [f"'{element_values.get(i, '?')}'" for i in range(max(element_values.keys()) + 1)]
+            results.append(f"[C: {', '.join(chars)}]")
+        elif '[I' in param_types[0]:
+            if element_values:
+                ints = [element_values.get(i, 0) for i in range(max(element_values.keys()) + 1)]
+                results.append(f"[I: {', '.join(map(str, ints))}]")
+            elif max_index >= 0:
+                results.append(f"[I: {', '.join(map(str, range(max_index + 1)))}]")
+            elif length_req and length_req[1] in ("gt", "ne"):
+                results.append("[I: 0]")
+            elif constants:
+                int_constants = [c for c in constants if isinstance(c, int) and c > 10]
+                if int_constants:
+                    val = max(int_constants) // 2 + 1
+                    results.append(f"[I: {val}, {val}, {val}]")
+        results.append(f"[{param_types[0][1]}: ]")
+        return results
     
-    if param_types and 'String' in str(param_types):
+    # Handle strings
+    if any('String' in str(pt) for pt in param_types):
         chars = [c for c in constants if isinstance(c, str) and len(c) == 1]
-        strings = string_constants if string_constants else []
         
-        if chars and strings:
-            result = []
-            char_prefix = ''.join(chars)
-            for s in strings:
-                result.append(char_prefix + s)
-            if has_null_check:
-                result.append("null")
-            return result
-        elif chars:
+        # Handle uppercase/lowercase transformations
+        if string_transform and string_constants:
+            test_values = []
+            for s in string_constants:
+                if string_transform == "uppercase":
+                    test_values.append(s.upper())
+                    test_values.append(s.lower())
+                elif string_transform == "lowercase":
+                    test_values.append(s.lower())
+                    test_values.append(s.upper())
+            return test_values
+        
+        # Check for alternating letter-digit pattern
+        if '0' in chars and '9' in chars:
+            int_constants = [c for c in constants if isinstance(c, int) and 0 < c < 30]
+            if int_constants:
+                target_sum = max(int_constants)
+                result = ""
+                
+                if target_sum >= 3:
+                    digits_needed = [1, 2, target_sum - 3]
+                else:
+                    digits_needed = [target_sum]
+                
+                for i, digit in enumerate(digits_needed):
+                    result += chr(ord('a') + i)
+                    result += str(digit)
+                
+                return [result]
+        
+        # Build string by interleaving characters with strings
+        if chars and string_constants:
+            result = ""
+            char_idx = 0
+            strings_to_match = [s for s in string_constants if s and s[0] in chars]
+            strings_no_match = [s for s in string_constants if not s or s[0] not in chars]
+            
+            for s in sorted(strings_to_match, key=lambda x: chars.index(x[0])):
+                while char_idx < len(chars) and chars[char_idx] != s[0]:
+                    result += chars[char_idx]
+                    char_idx += 1
+                result += s
+                char_idx += 1
+            
+            while char_idx < len(chars):
+                result += chars[char_idx]
+                char_idx += 1
+            
+            for s in strings_no_match:
+                result += s
+            
+            return [result] if result else string_constants
+        
+        if chars:
             result = string_constants.copy() if string_constants else []
             combined = ''.join(chars)
-            if combined:
+            if combined and combined not in result:
                 result.append(combined)
             return result
+        
+        if string_constants:
+            return string_constants
+        
+        return ["", "test"]
     
-    if string_constants:
-        return string_constants
-    
-    if param_types and all('String' in pt for pt in param_types) and not string_constants:
-        if not constants:
-            return []
-        small_cs = sorted({c for c in constants if isinstance(c, int) and 0 <= c <= 20})
-        if not small_cs:
-            return []
-        vals = []
-        for c in small_cs:
-            for L in [max(0, c-1), c, c+1]:
-                vals.append("a" * L)
-        return sorted(set(vals), key=len)
-    
-    # params are float/double, do float boundaries no matter how constants are typed
+    # Handle floats
     if any(pt in ("F", "D") for pt in param_types):
-        if not constants:
-            return []
-        nums = sorted(set(float(c) for c in constants))
-        out = []
-        for c in nums:
-            out.extend([c - 0.5, c, c + 0.5])
-        return sorted(set(out))
-    
-    # Handle parameter comparisons (2 parameters)
-    if has_param_comparison:
         if constants:
-            unique_constants = sorted(set(constants))
-            max_c = max(unique_constants)
-            return [[max_c - 1, max_c - 1], [max_c, max_c], [max_c + 1, max_c + 1],
-                    [max_c + 1, max_c + 10], [max_c + 5, max_c + 5], [max_c + 10, max_c + 1]]
-        else:
-            return [[50, 100], [75, 75], [100, 50]]
+            nums = sorted(set(float(c) for c in constants))
+            return sorted(set(v for n in nums for v in [n - 0.5, n, n + 0.5]))
     
-    # Handle integer ranges
+    # Handle parameter comparisons
+    if has_param_comparison and constants:
+        max_c = max(constants)
+        return [[max_c + d1, max_c + d2] for d1, d2 in [(-1, -1), (0, 0), (1, 1), (1, 10), (5, 5), (10, 1)]]
+    
+    # Check param_count FIRST
+    if param_count == 0:
+        return []
+    
+    # Handle integers with constants
     if constants:
-        unique_constants = sorted(set(constants))
+        unique = sorted(set(constants))
         
-        if any(isinstance(c, float) for c in unique_constants):
-            result = []
-            for c in unique_constants:
-                if isinstance(c, float):
-                    result.extend([c - 0.5, c, c + 0.5])
-            return sorted(set(result))
-
-        # For methods with 3+ parameters, generate complete test cases
         if param_count >= 3:
-            test_cases = []
-            for c in unique_constants:
-                below_val = c - 2
-                test_cases.append([below_val] * param_count)
-                test_cases.append([c] * param_count)
-                above_val = c + 2
-                test_cases.append([above_val] * param_count)
-            return test_cases
+            return [[c + d] * param_count for c in unique for d in [-2, 0, 2]]
         
-        # For single parameter methods
-        if len(unique_constants) == 1:
-            c = unique_constants[0]
-            return [c - 1, c, c + 1]
-        else:
-            result = []
-            for c in unique_constants:
-                result.extend([c - 1, c, c + 1])
-            return sorted(set(result))
+        if len(unique) == 1:
+            return [unique[0] + d for d in [-1, 0, 1]]
+        
+        return sorted(set(v for c in unique for v in [c - 1, c, c + 1]))
     
-    return []
+    # Fallback for methods with parameters but no constants
+    if param_count == 1:
+        return [0, 1]
+    else:
+        if bytecode and has_parameter_usage(bytecode, param_count):
+            return [[0, 0], [0, 1], [1, 0], [1, 1]]
+        else:
+            return [[1, 2]]
 
-def analyze(method_id: str) -> dict:
+def analyze(method_id: str):
+    """Analyze a method and generate test values."""
     suite = model.Suite(Path.cwd())
     
-    # NEW: Workaround for char array parsing bug
+    # Load method
     try:
         method = suite.findmethod(jvm.AbsMethodID.decode(method_id))
     except AssertionError:
         if '[C' in method_id:
-            import json
             class_name = method_id.split(':')[0].rsplit('.', 1)[0].replace('.', '/')
             method_name = method_id.split(':')[0].rsplit('.', 1)[1]
-            class_file = Path.cwd() / "target" / "decompiled" / f"{class_name}.json" 
-            with open(class_file) as f:
-                class_data = json.load(f)
-            for m in class_data['methods']:
-                if m['name'] == method_name:
-                    method = m
-                    break
+            with open(Path.cwd() / "target" / "decompiled" / f"{class_name}.json") as f:
+                for m in json.load(f)['methods']:
+                    if m['name'] == method_name:
+                        method = m
+                        break
         else:
             raise
     
     bytecode = method["code"]["bytecode"]
-    param_count = get_parameter_count(method_id)
-    param_types = get_parameter_types(method_id)
+    param_count, param_types = parse_method_signature(method_id)
+    constants, string_constants, has_param_comparison, has_null_check, string_transform = extract_constants(bytecode, param_count)
     
-    max_index, element_values, length_req = detect_array_info(bytecode)
     if any('[' in pt for pt in param_types):
-        constants = find_comparison_constants(bytecode)  # NEW: get constants for arrays too
-        test_values = generate_array_values(param_types[0], max_index, element_values, length_req, constants)  # NEW: pass constants
+        max_idx, elem_vals, len_req = extract_array_info(bytecode)
+        test_values = generate_values(param_types, constants, string_constants, 
+                                      has_param_comparison, string_transform, 
+                                      max_idx, elem_vals, len_req, bytecode)
     else:
-        constants = find_comparison_constants(bytecode)
-        string_constants = find_string_constants(bytecode)
-        has_param_comparison = find_parameter_comparisons(bytecode)
-        test_values = generate_test_values(constants, string_constants, has_param_comparison, 
-                                          param_count, param_types)
+        test_values = generate_values(param_types, constants, string_constants, 
+                                      has_param_comparison, string_transform, 
+                                      bytecode=bytecode)
     
     return {"method": method_id, "values": test_values}
 
-def main(argv: list[str]) -> int:
+def main(argv):
     if len(argv) == 2 and argv[1] == "info":
         print_info()
         return 0
