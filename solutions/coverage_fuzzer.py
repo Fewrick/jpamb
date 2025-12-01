@@ -338,13 +338,10 @@ def fuzz_method(
     if save_path is not None:
         save_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if not params:
-        iterations = 1  # no parameters, only one iteration needed
-
     # Graph array
-    interation_coverage = [100.0 for _ in range(iterations)]
+    iteration_coverage = [100.0 for _ in range(iterations)]
 
-    for i in range(iterations):
+    for i in range(1 if not params else iterations):
         global max_value, min_value
         max_value = 1000
         min_value = -1000
@@ -401,8 +398,11 @@ def fuzz_method(
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
 
         coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
-        interation_coverage[i] = coverage_pct
+        iteration_coverage[i] = coverage_pct
         
+    if not params:
+        iteration_coverage = [coverage_pct for _ in range(iterations)]
+
     end_time = time.time()
     elapsed = end_time - start_time
 
@@ -415,7 +415,7 @@ def fuzz_method(
         "total": len(all_offsets),
         "percent": coverage_pct,
         "time": elapsed,
-        "interation_coverage": interation_coverage,
+        "iteration_coverage": iteration_coverage,
     }
 
 def get_all_cases_from_file() -> list[str]:
@@ -483,7 +483,7 @@ def main():
                     analysis=args.analysis,
                 )
                 results.append(stats)
-                coverage_results.append(stats['interation_coverage'])
+                coverage_results.append(stats['iteration_coverage'])
             except Exception as e:
                 print(f"\033[91mError fuzzing {mid}: {e}\033[0m")
                 results.append({"method": mid, "error": str(e)})
@@ -494,7 +494,8 @@ def main():
 
         for case in coverage_results:
             for i in range(len(case)):
-                avg_coverage_per_iteration[i-1] += case[i-1] / len(coverage_results)
+                print(f"Debug: Adding {case[i]} / {len(coverage_results)} to iteration {i}")
+                avg_coverage_per_iteration[i] += case[i] / len(coverage_results)
 
         print("\n" + "="*100)
         print(f"{'Method ID':<60} | {'Cov %':<8} | {'Time (s)':<8}")
