@@ -494,7 +494,6 @@ def main():
 
         for case in coverage_results:
             for i in range(len(case)):
-                print(f"Debug: Adding {case[i]} / {len(coverage_results)} to iteration {i}")
                 avg_coverage_per_iteration[i] += case[i] / len(coverage_results)
 
         print("\n" + "="*100)
