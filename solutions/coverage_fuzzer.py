@@ -341,6 +341,9 @@ def fuzz_method(
     if not params:
         iterations = 1  # no parameters, only one iteration needed
 
+    # Graph array
+    interation_coverage = [100.0 for _ in range(iterations)]
+
     for i in range(iterations):
         global max_value, min_value
         max_value = 1000
@@ -396,9 +399,13 @@ def fuzz_method(
         else:
             coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
             print(f"\033[93m[-]\033[0m no new coverage  input={in_str}\t\tresult={result}")
+
+        coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
+        interation_coverage[i] = coverage_pct
+        
     end_time = time.time()
     elapsed = end_time - start_time
-    coverage_pct = (len(global_coverage)/len(all_offsets)*100) if all_offsets else 0.0
+
     print(f"\033[94mFuzzing complete. Total coverage: {len(global_coverage)}/{len(all_offsets)} edges ({coverage_pct:.2f}%)\033[0m")
     print(f"\033[94mElapsed time: {elapsed:.2f} seconds\033[0m")
 
@@ -407,7 +414,8 @@ def fuzz_method(
         "coverage": len(global_coverage),
         "total": len(all_offsets),
         "percent": coverage_pct,
-        "time": elapsed
+        "time": elapsed,
+        "interation_coverage": interation_coverage,
     }
 
 def get_all_cases_from_file() -> list[str]:
@@ -459,6 +467,7 @@ def main():
 
         results = []
         total_start_time = time.time()
+        coverage_results = []
 
         for mid in method_ids:
             print(f"\n\033[1m{'='*80}\nFuzzing {mid}\n{'='*80}\033[0m")
@@ -474,12 +483,19 @@ def main():
                     analysis=args.analysis,
                 )
                 results.append(stats)
+                coverage_results.append(stats['interation_coverage'])
             except Exception as e:
                 print(f"\033[91mError fuzzing {mid}: {e}\033[0m")
                 results.append({"method": mid, "error": str(e)})
         
         total_elapsed = time.time() - total_start_time
-        
+
+        avg_coverage_per_iteration = [0.0 for _ in range(args.iterations)]
+
+        for case in coverage_results:
+            for i in range(len(case)):
+                avg_coverage_per_iteration[i-1] += case[i-1] / len(coverage_results)
+
         print("\n" + "="*100)
         print(f"{'Method ID':<60} | {'Cov %':<8} | {'Time (s)':<8}")
         print("-" * 100)
@@ -516,6 +532,7 @@ def main():
         print(f"Total Elapsed Time: {total_elapsed:.2f}s")
         print(f"Average Coverage:   {avg_cov:.2f}%")
         print(f"Total Coverage:     {total_cov_pct:.2f}% ({total_covered_edges}/{total_available_edges} edges)")
+        print(f"Average Coverage Over Iterations: {avg_coverage_per_iteration}\n")
         
         return
 
