@@ -1,198 +1,264 @@
 Test results 
 
-==================== Fuzzer with Syntactic Analysis ====================
-Iterations: 100
-Mut-rate: default
-
-====================================================================================================
-Method ID                                                    | Cov %    | Time (s)
-----------------------------------------------------------------------------------------------------
-jpamb.cases.Arrays.arrayContent:()V                          | ERR      | -       
-jpamb.cases.Arrays.arrayInBounds:()V                         | ERR      | -       
-jpamb.cases.Arrays.arrayIsNull:()V                           | ERR      | -       
-jpamb.cases.Arrays.arrayIsNullLength:()V                     | ERR      | -       
-jpamb.cases.Arrays.arrayLength:()V                           | ERR      | -       
-jpamb.cases.Arrays.arrayNotEmpty:([I)V                       |   0.00% |  11.72
-jpamb.cases.Arrays.arrayOutOfBounds:()V                      | ERR      | -       
-jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.95
-jpamb.cases.Arrays.arraySpellsHello:([C)V                    | ERR      | -       
-jpamb.cases.Arrays.arraySumIsLarge:([I)V                     |   0.00% |  11.78
-jpamb.cases.Arrays.binarySearch:(I)V                         |  97.10% |  12.17
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      |  87.50% |  12.15
-jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         |  83.46% |  11.88
-jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        |  47.17% |  11.96
-jpamb.cases.Calls.allPrimesArePositive:(I)V                  |  11.94% |  12.67
-jpamb.cases.Calls.callsAssertFalse:()V                       | ERR      | -       
-jpamb.cases.Calls.callsAssertFib:(I)V                        | 100.00% |   1.06
-jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  11.86
-jpamb.cases.Calls.callsAssertIfWithTrue:()V                  | ERR      | -       
-jpamb.cases.Calls.callsAssertTrue:()V                        | ERR      | -       
-jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   0.70
-jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   0.34
-jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   0.23
-jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  11.93
-jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  11.86
-jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          |  86.67% |  11.76
-jpamb.cases.Loops.forever:()V                                | ERR      | -       
-jpamb.cases.Loops.neverAsserts:()V                           | ERR      | -       
-jpamb.cases.Loops.neverDivides:()I                           | ERR      | -       
-jpamb.cases.Loops.terminates:()V                             | ERR      | -       
-jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.23
-jpamb.cases.Simple.assertFalse:()V                           | ERR      | -       
-jpamb.cases.Simple.assertInteger:(I)V                        | 100.00% |   0.24
-jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   0.35
-jpamb.cases.Simple.checkBeforeAssert:(I)V                    | 100.00% |   0.35
-jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  76.47% |  11.80
-jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 | 100.00% |   0.25
-jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.12
-jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.12
-jpamb.cases.Simple.divideByZero:()I                          | ERR      | -       
-jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   0.12
-jpamb.cases.Simple.earlyReturn:()I                           | ERR      | -       
-jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   0.12
-jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   0.12
-jpamb.cases.Simple.justReturn:()I                            | ERR      | -       
-jpamb.cases.Simple.justReturnNothing:()V                     | ERR      | -       
-jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  11.82
-jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   |  76.19% |  11.92
-jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     |  75.00% |  11.96
-jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   | ERR      | -       
-jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  81.25% |  11.81
-jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.89
-jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   0.60
-----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 219.93s
-Average Coverage:   83.39%
-Total Coverage:     76.16% (607/797 edges)
-
-
 ==================== Fuzzer with no Analysis ====================
-Iterations: 100
-Mut-rate: default
+Iterations: 30
+Mut-rate: 60%
 
 ====================================================================================================
 Method ID                                                    | Cov %    | Time (s)
 ----------------------------------------------------------------------------------------------------
-jpamb.cases.Arrays.arrayContent:()V                          |  95.00% |  12.22
-jpamb.cases.Arrays.arrayInBounds:()V                         | 100.00% |   0.12
-jpamb.cases.Arrays.arrayIsNull:()V                           |  85.71% |  11.78
-jpamb.cases.Arrays.arrayIsNullLength:()V                     |  50.00% |  11.82
-jpamb.cases.Arrays.arrayLength:()V                           |  71.43% |  11.84
-jpamb.cases.Arrays.arrayNotEmpty:([I)V                       |   0.00% |  11.72
-jpamb.cases.Arrays.arrayOutOfBounds:()V                      |  87.50% |  11.95
-jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.78
-jpamb.cases.Arrays.arraySpellsHello:([C)V                    |   0.00% |  11.76
-jpamb.cases.Arrays.arraySumIsLarge:([I)V                     |   0.00% |  11.67
-jpamb.cases.Arrays.binarySearch:(I)V                         |  97.10% |  12.37
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      |  87.50% |  12.06
-jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         |  62.99% |  12.00
-jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        |  47.17% |  11.75
-jpamb.cases.Calls.allPrimesArePositive:(I)V                  |  11.94% |  12.24
-jpamb.cases.Calls.callsAssertFalse:()V                       |  85.71% |  11.71
-jpamb.cases.Calls.callsAssertFib:(I)V                        |  32.00% |  12.12
-jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  11.82
-jpamb.cases.Calls.callsAssertIfWithTrue:()V                  |  42.86% |  11.88
-jpamb.cases.Calls.callsAssertTrue:()V                        | 100.00% |   0.11
-jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   1.74
-jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   1.06
-jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   1.54
-jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  12.00
-jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  11.87
-jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          |  86.67% |  11.80
-jpamb.cases.Loops.forever:()V                                |   0.00% |  14.09
-jpamb.cases.Loops.neverAsserts:()V                           |   0.00% |  13.97
-jpamb.cases.Loops.neverDivides:()I                           |   0.00% |  13.93
-jpamb.cases.Loops.terminates:()V                             |  93.75% |  12.08
-jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.23
-jpamb.cases.Simple.assertFalse:()V                           |  85.71% |  11.71
-jpamb.cases.Simple.assertInteger:(I)V                        |  55.56% |  11.72
-jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   4.11
-jpamb.cases.Simple.checkBeforeAssert:(I)V                    |  85.71% |  11.88
-jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  35.29% |  11.85
-jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 |  66.67% |  11.80
-jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.12
-jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.12
-jpamb.cases.Simple.divideByZero:()I                          |  75.00% |  11.87
-jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   0.12
-jpamb.cases.Simple.earlyReturn:()I                           | 100.00% |   0.12
-jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   0.12
-jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   0.12
-jpamb.cases.Simple.justReturn:()I                            | 100.00% |   0.12
-jpamb.cases.Simple.justReturnNothing:()V                     | 100.00% |   0.12
-jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  11.84
-jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   |  76.19% |  11.77
-jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     |  75.00% |  11.75
-jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   | ERR      | -       
-jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  68.75% |  12.26
-jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.88
-jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   0.47
+jpamb.cases.Arrays.arrayContent:()V                          |  95.00% |   0.40
+jpamb.cases.Arrays.arrayInBounds:()V                         | 100.00% |   0.38
+jpamb.cases.Arrays.arrayIsNull:()V                           |  85.71% |   0.54
+jpamb.cases.Arrays.arrayIsNullLength:()V                     |  50.00% |   0.40
+jpamb.cases.Arrays.arrayLength:()V                           |  71.43% |   0.37
+jpamb.cases.Arrays.arrayNotEmpty:([I)V                       | 100.00% |   1.11
+jpamb.cases.Arrays.arrayOutOfBounds:()V                      |  87.50% |   0.36
+jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.51
+jpamb.cases.Arrays.arraySpellsHello:([C)V                    |  34.38% |  11.49
+jpamb.cases.Arrays.arraySumIsLarge:([I)V                     |  96.15% |  11.53
+jpamb.cases.Arrays.binarySearch:(I)V                         |  97.10% |  11.97
+jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      |  91.25% |  11.45
+jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         |  35.43% |  11.99
+jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        |  47.17% |  12.09
+jpamb.cases.Calls.allPrimesArePositive:(I)V                  |  97.01% |  11.70
+jpamb.cases.Calls.callsAssertFalse:()V                       |  85.71% |   0.44
+jpamb.cases.Calls.callsAssertFib:(I)V                        |  68.00% |  17.65
+jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  11.47
+jpamb.cases.Calls.callsAssertIfWithTrue:()V                  |  42.86% |   0.39
+jpamb.cases.Calls.callsAssertTrue:()V                        | 100.00% |   0.39
+jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   5.22
+jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   3.90
+jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   3.85
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  11.53
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  12.20
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          | 100.00% |   2.66
+jpamb.cases.Loops.forever:()V                                | 100.00% |   0.46
+jpamb.cases.Loops.neverAsserts:()V                           |  36.36% |   0.46
+jpamb.cases.Loops.neverDivides:()I                           |  50.00% |   0.46
+jpamb.cases.Loops.terminates:()V                             |  93.75% |   0.39
+jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.76
+jpamb.cases.Simple.assertFalse:()V                           |  85.71% |   0.38
+jpamb.cases.Simple.assertInteger:(I)V                        |  55.56% |  11.37
+jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   0.75
+jpamb.cases.Simple.checkBeforeAssert:(I)V                    |  85.71% |  11.48
+jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  35.29% |  11.40
+jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 |  66.67% |  11.41
+jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.36
+jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.38
+jpamb.cases.Simple.divideByZero:()I                          |  75.00% |   0.37
+jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   0.39
+jpamb.cases.Simple.earlyReturn:()I                           | 100.00% |   0.38
+jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   0.37
+jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   0.38
+jpamb.cases.Simple.justReturn:()I                            | 100.00% |   0.39
+jpamb.cases.Simple.justReturnNothing:()V                     | 100.00% |   0.36
+jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  11.17
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   |  76.19% |  11.64
+jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     |  50.00% |  11.53
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   |  71.43% |  11.41
+jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  81.25% |  11.37
+jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.58
+jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   3.40
 ----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 444.95s
-Average Coverage:   72.89%
-Total Coverage:     68.75% (660/960 edges)
+Total Elapsed Time: 292.05s
+Average Coverage:   82.58%
+Total Coverage:     75.52% (765/1013 edges)
+
+
+==================== Fuzzer with Syntactic Analysis ====================
+Iterations: 30
+Mut-rate: 60%
+
+====================================================================================================
+Method ID                                                    | Cov %    | Time (s)
+----------------------------------------------------------------------------------------------------
+jpamb.cases.Arrays.arrayContent:()V                          |  95.00% |   0.40
+jpamb.cases.Arrays.arrayInBounds:()V                         | 100.00% |   0.37
+jpamb.cases.Arrays.arrayIsNull:()V                           |  85.71% |   0.40
+jpamb.cases.Arrays.arrayIsNullLength:()V                     |  50.00% |   0.40
+jpamb.cases.Arrays.arrayLength:()V                           |  71.43% |   0.38
+jpamb.cases.Arrays.arrayNotEmpty:([I)V                       | 100.00% |   0.77
+jpamb.cases.Arrays.arrayOutOfBounds:()V                      |  87.50% |   0.40
+jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.14
+jpamb.cases.Arrays.arraySpellsHello:([C)V                    | 100.00% |   1.11
+jpamb.cases.Arrays.arraySumIsLarge:([I)V                     | 100.00% |   0.77
+jpamb.cases.Arrays.binarySearch:(I)V                         |  98.55% |  11.37
+jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      |  91.25% |  11.39
+jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         |  95.28% |  12.02
+jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        |  86.79% |  11.42
+jpamb.cases.Calls.allPrimesArePositive:(I)V                  | 100.00% |   1.56
+jpamb.cases.Calls.callsAssertFalse:()V                       |  85.71% |   0.38
+jpamb.cases.Calls.callsAssertFib:(I)V                        | 100.00% |   1.78
+jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  12.03
+jpamb.cases.Calls.callsAssertIfWithTrue:()V                  |  42.86% |   0.40
+jpamb.cases.Calls.callsAssertTrue:()V                        | 100.00% |   0.39
+jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   2.20
+jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   1.16
+jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   0.75
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  11.48
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  11.67
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          | 100.00% |   2.15
+jpamb.cases.Loops.forever:()V                                | 100.00% |   0.59
+jpamb.cases.Loops.neverAsserts:()V                           |  36.36% |   0.48
+jpamb.cases.Loops.neverDivides:()I                           |  50.00% |   0.54
+jpamb.cases.Loops.terminates:()V                             |  93.75% |   0.39
+jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.76
+jpamb.cases.Simple.assertFalse:()V                           |  85.71% |   0.39
+jpamb.cases.Simple.assertInteger:(I)V                        | 100.00% |   0.76
+jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   1.11
+jpamb.cases.Simple.checkBeforeAssert:(I)V                    | 100.00% |   1.19
+jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  76.47% |  11.20
+jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 | 100.00% |   0.73
+jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.81
+jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.39
+jpamb.cases.Simple.divideByZero:()I                          |  75.00% |   0.40
+jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   1.89
+jpamb.cases.Simple.earlyReturn:()I                           | 100.00% |   0.36
+jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   1.85
+jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   1.83
+jpamb.cases.Simple.justReturn:()I                            | 100.00% |   0.37
+jpamb.cases.Simple.justReturnNothing:()V                     | 100.00% |   0.39
+jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  11.21
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   |  76.19% |  11.37
+jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     |  75.00% |  11.19
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   |  76.19% |  11.66
+jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  84.38% |  11.50
+jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.32
+jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   1.92
+----------------------------------------------------------------------------------------------------
+Total Elapsed Time: 205.02s
+Average Coverage:   89.59%
+Total Coverage:     90.72% (919/1013 edges)
 
 
 ==================== Fuzzer with Sign Analysis ====================
-Iterations: 100
-Mut-rate: default
+Iterations: 30
+Mut-rate: 60%
 
 ====================================================================================================
 Method ID                                                    | Cov %    | Time (s)
 ----------------------------------------------------------------------------------------------------
-jpamb.cases.Arrays.arrayContent:()V                          | ERR      | -       
-jpamb.cases.Arrays.arrayInBounds:()V                         | ERR      | -       
-jpamb.cases.Arrays.arrayIsNull:()V                           | ERR      | -       
-jpamb.cases.Arrays.arrayIsNullLength:()V                     | ERR      | -       
-jpamb.cases.Arrays.arrayLength:()V                           | ERR      | -       
-jpamb.cases.Arrays.arrayNotEmpty:([I)V                       |   0.00% |  11.87
-jpamb.cases.Arrays.arrayOutOfBounds:()V                      | ERR      | -       
-jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.88
-jpamb.cases.Arrays.arraySpellsHello:([C)V                    |   0.00% |  11.54
-jpamb.cases.Arrays.arraySumIsLarge:([I)V                     |   0.00% |  11.78
-jpamb.cases.Arrays.binarySearch:(I)V                         |  98.55% |  12.41
-jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      | ERR      | -       
-jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         | ERR      | -       
-jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        | ERR      | -       
-jpamb.cases.Calls.allPrimesArePositive:(I)V                  |  11.94% |  12.49
-jpamb.cases.Calls.callsAssertFalse:()V                       | ERR      | -       
-jpamb.cases.Calls.callsAssertFib:(I)V                        | 100.00% |   0.61
-jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  11.88
-jpamb.cases.Calls.callsAssertIfWithTrue:()V                  | ERR      | -       
-jpamb.cases.Calls.callsAssertTrue:()V                        | ERR      | -       
-jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   2.86
-jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   0.24
-jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   0.60
-jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  11.83
-jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  12.25
-jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          |  86.67% |  12.26
-jpamb.cases.Loops.forever:()V                                | ERR      | -       
-jpamb.cases.Loops.neverAsserts:()V                           | ERR      | -       
-jpamb.cases.Loops.neverDivides:()I                           | ERR      | -       
-jpamb.cases.Loops.terminates:()V                             | ERR      | -       
-jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.36
-jpamb.cases.Simple.assertFalse:()V                           | ERR      | -       
-jpamb.cases.Simple.assertInteger:(I)V                        | 100.00% |   0.36
-jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   0.24
-jpamb.cases.Simple.checkBeforeAssert:(I)V                    | 100.00% |   0.48
-jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  76.47% |  12.06
-jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 | 100.00% |   0.36
-jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.12
-jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.12
-jpamb.cases.Simple.divideByZero:()I                          | ERR      | -       
-jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   0.12
-jpamb.cases.Simple.earlyReturn:()I                           | ERR      | -       
-jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   0.13
-jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   0.13
-jpamb.cases.Simple.justReturn:()I                            | ERR      | -       
-jpamb.cases.Simple.justReturnNothing:()V                     | ERR      | -       
-jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  11.95
-jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   | ERR      | -       
-jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     | ERR      | -       
-jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   | ERR      | -       
-jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        | ERR      | -       
-jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   | ERR      | -       
-jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   0.51
+jpamb.cases.Arrays.arrayContent:()V                          |  95.00% |   0.36
+jpamb.cases.Arrays.arrayInBounds:()V                         | 100.00% |   0.38
+jpamb.cases.Arrays.arrayIsNull:()V                           |  85.71% |   0.39
+jpamb.cases.Arrays.arrayIsNullLength:()V                     |  50.00% |   0.41
+jpamb.cases.Arrays.arrayLength:()V                           |  71.43% |   0.37
+jpamb.cases.Arrays.arrayNotEmpty:([I)V                       | 100.00% |   1.11
+jpamb.cases.Arrays.arrayOutOfBounds:()V                      |  87.50% |   0.36
+jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.42
+jpamb.cases.Arrays.arraySpellsHello:([C)V                    |  34.38% |  12.61
+jpamb.cases.Arrays.arraySumIsLarge:([I)V                     |  96.15% |  11.84
+jpamb.cases.Arrays.binarySearch:(I)V                         |  98.55% |  11.76
+jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      |  87.50% |  12.31
+jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         |  53.54% |  11.62
+jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        |  47.17% |  12.36
+jpamb.cases.Calls.allPrimesArePositive:(I)V                  |  97.01% |  14.79
+jpamb.cases.Calls.callsAssertFalse:()V                       |  85.71% |   0.37
+jpamb.cases.Calls.callsAssertFib:(I)V                        | 100.00% |   1.73
+jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  11.12
+jpamb.cases.Calls.callsAssertIfWithTrue:()V                  |  42.86% |   0.38
+jpamb.cases.Calls.callsAssertTrue:()V                        | 100.00% |   0.37
+jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   1.12
+jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   0.74
+jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   1.82
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  11.36
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  11.85
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          | 100.00% |   3.76
+jpamb.cases.Loops.forever:()V                                | 100.00% |   0.47
+jpamb.cases.Loops.neverAsserts:()V                           |  36.36% |   0.46
+jpamb.cases.Loops.neverDivides:()I                           |  50.00% |   0.51
+jpamb.cases.Loops.terminates:()V                             |  93.75% |   0.38
+jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.72
+jpamb.cases.Simple.assertFalse:()V                           |  85.71% |   0.36
+jpamb.cases.Simple.assertInteger:(I)V                        | 100.00% |   1.14
+jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   0.74
+jpamb.cases.Simple.checkBeforeAssert:(I)V                    | 100.00% |   1.52
+jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  76.47% |  10.92
+jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 | 100.00% |   1.14
+jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.36
+jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.38
+jpamb.cases.Simple.divideByZero:()I                          |  75.00% |   0.37
+jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   0.36
+jpamb.cases.Simple.earlyReturn:()I                           | 100.00% |   0.37
+jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   0.36
+jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   0.36
+jpamb.cases.Simple.justReturn:()I                            | 100.00% |   0.37
+jpamb.cases.Simple.justReturnNothing:()V                     | 100.00% |   0.35
+jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  10.77
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   |  76.19% |  10.95
+jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     |  50.00% |  10.83
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   |  71.43% |  10.89
+jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  84.38% |  11.21
+jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.56
+jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   2.23
 ----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 152.46s
-Average Coverage:   82.43%
-Total Coverage:     75.34% (333/442 edges)
+Total Elapsed Time: 236.91s
+Average Coverage:   86.06%
+Total Coverage:     80.16% (812/1013 edges)
+
+
+==================== Fuzzer with Both Analyses ====================
+Iterations: 30
+Mut-rate: 60%
+
+====================================================================================================
+Method ID                                                    | Cov %    | Time (s)
+----------------------------------------------------------------------------------------------------
+jpamb.cases.Arrays.arrayContent:()V                          |  95.00% |   0.36
+jpamb.cases.Arrays.arrayInBounds:()V                         | 100.00% |   0.42
+jpamb.cases.Arrays.arrayIsNull:()V                           |  85.71% |   0.38
+jpamb.cases.Arrays.arrayIsNullLength:()V                     |  50.00% |   0.37
+jpamb.cases.Arrays.arrayLength:()V                           |  71.43% |   0.37
+jpamb.cases.Arrays.arrayNotEmpty:([I)V                       | 100.00% |   0.78
+jpamb.cases.Arrays.arrayOutOfBounds:()V                      |  87.50% |   0.38
+jpamb.cases.Arrays.arraySometimesNull:(I)V                   |  94.12% |  11.77
+jpamb.cases.Arrays.arraySpellsHello:([C)V                    | 100.00% |   1.20
+jpamb.cases.Arrays.arraySumIsLarge:([I)V                     | 100.00% |   0.77
+jpamb.cases.Arrays.binarySearch:(I)V                         |  98.55% |  12.52
+jpamb.cases.Branch.alternatingSum:(Ljava/lang/String;)V      |  81.25% |  11.91
+jpamb.cases.Branch.deepNesting:(Ljava/lang/String;)V         |  84.25% |  11.59
+jpamb.cases.Branch.fireTheNukes:(Ljava/lang/String;)V        |  86.79% |  11.69
+jpamb.cases.Calls.allPrimesArePositive:(I)V                  | 100.00% |   2.53
+jpamb.cases.Calls.callsAssertFalse:()V                       |  85.71% |   0.38
+jpamb.cases.Calls.callsAssertFib:(I)V                        | 100.00% |   1.85
+jpamb.cases.Calls.callsAssertIf:(Z)V                         |  92.86% |  11.56
+jpamb.cases.Calls.callsAssertIfWithTrue:()V                  |  42.86% |   0.39
+jpamb.cases.Calls.callsAssertTrue:()V                        | 100.00% |   0.49
+jpamb.cases.Floats.floatGreaterThanThree:(F)V                | 100.00% |   2.22
+jpamb.cases.Floats.floatIsPositive:(F)V                      | 100.00% |   1.10
+jpamb.cases.Floats.nonNegativeFloat:(F)V                     | 100.00% |   0.72
+jpamb.cases.Loops.averageCategory:(III)Ljava/lang/String;    |  90.00% |  11.51
+jpamb.cases.Loops.compareScores:(II)Ljava/lang/String;       |  83.33% |  12.12
+jpamb.cases.Loops.examResult:(IZ)Ljava/lang/String;          | 100.00% |   2.28
+jpamb.cases.Loops.forever:()V                                | 100.00% |   0.68
+jpamb.cases.Loops.neverAsserts:()V                           |  36.36% |   0.74
+jpamb.cases.Loops.neverDivides:()I                           |  50.00% |   0.65
+jpamb.cases.Loops.terminates:()V                             |  93.75% |   0.61
+jpamb.cases.Simple.assertBoolean:(Z)V                        | 100.00% |   0.97
+jpamb.cases.Simple.assertFalse:()V                           |  85.71% |   0.39
+jpamb.cases.Simple.assertInteger:(I)V                        | 100.00% |   0.81
+jpamb.cases.Simple.assertPositive:(I)V                       | 100.00% |   1.15
+jpamb.cases.Simple.checkBeforeAssert:(I)V                    | 100.00% |   1.21
+jpamb.cases.Simple.checkBeforeDivideByN2:(I)I                |  76.47% |  11.19
+jpamb.cases.Simple.checkBeforeDivideByN:(I)I                 | 100.00% |   0.75
+jpamb.cases.Simple.divideByN:(I)I                            | 100.00% |   0.74
+jpamb.cases.Simple.divideByNMinus10054203:(I)I               | 100.00% |   0.36
+jpamb.cases.Simple.divideByZero:()I                          |  75.00% |   0.37
+jpamb.cases.Simple.divideZeroByZero:(II)I                    | 100.00% |   1.81
+jpamb.cases.Simple.earlyReturn:()I                           | 100.00% |   0.37
+jpamb.cases.Simple.justAdd:(II)I                             | 100.00% |   1.81
+jpamb.cases.Simple.justMulitply:(II)I                        | 100.00% |   1.79
+jpamb.cases.Simple.justReturn:()I                            | 100.00% |   0.38
+jpamb.cases.Simple.justReturnNothing:()V                     | 100.00% |   0.36
+jpamb.cases.Simple.multiError:(Z)I                           |  91.67% |  10.88
+jpamb.cases.Strings.atLeastThreeChars:(Ljava/lang/Strin...   |  76.19% |  10.99
+jpamb.cases.Strings.nonEmptyString:(Ljava/lang/String;)V     |  75.00% |  10.97
+jpamb.cases.Strings.spellsExactlyProgramAnalysis:(Ljava...   |  76.19% |  11.10
+jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  84.38% |  11.22
+jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  12.15
+jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   1.96
+----------------------------------------------------------------------------------------------------
+Total Elapsed Time: 208.19s
+Average Coverage:   89.20%
+Total Coverage:     88.55% (897/1013 edges)
