@@ -532,7 +532,9 @@ def main():
         print(f"Total Elapsed Time: {total_elapsed:.2f}s")
         print(f"Average Coverage:   {avg_cov:.2f}%")
         print(f"Total Coverage:     {total_cov_pct:.2f}% ({total_covered_edges}/{total_available_edges} edges)")
-        print(f"Average Coverage Over Iterations: {avg_coverage_per_iteration}\n")
+        formatted = [f"{x:.2f}" for x in avg_coverage_per_iteration]
+        print(f"Average Coverage Over Iterations: {formatted}\n")
+
         
         return
 
