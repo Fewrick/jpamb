@@ -61,9 +61,10 @@ jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  81.25% |  11.37
 jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.58
 jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   3.40
 ----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 292.05s
-Average Coverage:   82.58%
-Total Coverage:     75.52% (765/1013 edges)
+Total Elapsed Time: 292.05s        /         90.54s
+Average Coverage:   82.58%         /         83.30%
+Total Coverage:     75.52% (765/1013 edges)            /       78.58% (796/1013 edges)
+Average Coverage Over Iterations: ['69.75', '74.91', '75.75', '77.80', '79.41', '79.41', '80.60', '80.60', '80.60', '80.66', '80.87', '81.10', '81.10', '81.45', '81.45', '81.52', '81.52', '81.52', '81.52', '81.95', '81.95', '81.95', '81.95', '81.95', '81.95', '81.95', '82.70', '82.70', '82.70', '83.30']
 
 
 ==================== Fuzzer with Syntactic Analysis ====================
@@ -127,10 +128,10 @@ jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  84.38% |  11.50
 jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.32
 jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   1.92
 ----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 205.02s
-Average Coverage:   89.59%
-Total Coverage:     90.72% (919/1013 edges)
-
+Total Elapsed Time: 205.02s          /          64.70s
+Average Coverage:   89.59%           /          89.34%
+Total Coverage:     90.72% (919/1013 edges)            /            90.03% (912/1013 edges)
+Average Coverage Over Iterations: ['66.03', '73.97', '75.63', '78.31', '86.29', '86.45', '88.17', '88.61', '88.61', '88.61', '88.61', '88.79', '89.25', '89.25', '89.25', '89.25', '89.25', '89.25', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34', '89.34']
 
 ==================== Fuzzer with Sign Analysis ====================
 Iterations: 30
@@ -193,10 +194,10 @@ jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  84.38% |  11.21
 jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  11.56
 jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   2.23
 ----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 236.91s
-Average Coverage:   86.06%
-Total Coverage:     80.16% (812/1013 edges)
-
+Total Elapsed Time: 236.91s           /         74.98s
+Average Coverage:   86.06%            /         85.77%
+Total Coverage:     80.16% (812/1013 edges)         /         76.51% (775/1013 edges)
+Average Coverage Over Iterations: ['67.96', '76.35', '78.98', '80.91', '80.91', '83.74', '83.74', '83.74', '83.74', '84.98', '84.98', '85.48', '85.48', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.69', '85.77', '85.77', '85.77']
 
 ==================== Fuzzer with Both Analyses ====================
 Iterations: 30
@@ -259,6 +260,6 @@ jpamb.cases.Strings.startsWithH:(Ljava/lang/String;)V        |  84.38% |  11.22
 jpamb.cases.Strings.stringIsUppercase:(Ljava/lang/Strin...   |  77.27% |  12.15
 jpamb.cases.Tricky.collatz:(I)V                              | 100.00% |   1.96
 ----------------------------------------------------------------------------------------------------
-Total Elapsed Time: 208.19s
-Average Coverage:   89.20%
-Total Coverage:     88.55% (897/1013 edges)
+Total Elapsed Time: 208.19s       /        64.53s
+Average Coverage:   89.20%        /        89.34%
+Total Coverage:     88.55% (897/1013 edges)          /        90.03% (912/1013 edges)
